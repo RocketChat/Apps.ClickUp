@@ -17,7 +17,7 @@ export class NotificationsController {
         this.persistence = persistence;
         this.association = new RocketChatAssociationRecord(
             RocketChatAssociationModel.MISC,
-            `calendar-notifications`,
+            `clickup-notifications`,
         );
 
         this.userAssociation = new RocketChatAssociationRecord(
