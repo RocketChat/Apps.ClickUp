@@ -17,6 +17,7 @@ import { createOAuth2Client } from '@rocket.chat/apps-engine/definition/oauth2/O
 import { create as registerAuthorizedUser } from './src/storage/users';
 import { IMessageButonActions } from './IClickUpApp';
 import { createSectionBlock } from './src/lib/blocks';
+import { ClickUp as ClickUpCommand } from './src/slashcommands/clickUp';
 
 export class ClickUpApp extends App {
 
@@ -113,6 +114,7 @@ export class ClickUpApp extends App {
 
         await Promise.all([
             this.getOauth2ClientInstance().setup(configuration),
+            configuration.slashCommands.provideSlashCommand(new ClickUpCommand(this)),
         ]);
     }
 
