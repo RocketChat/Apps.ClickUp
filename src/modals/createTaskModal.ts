@@ -53,7 +53,7 @@ export async function createTaskModal({ modify, read, persistence, http, slashco
         id: viewId,
         title: {
             type: TextObjectType.PLAINTEXT,
-            text: AppEnum.DEFAULT_TITLE,
+            text: ModalsEnum.CREATE_TASK_MODAL_NAME,
         },
         close: block.newButtonElement({
             text: {
