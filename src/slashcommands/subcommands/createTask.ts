@@ -15,16 +15,6 @@ import { createTaskModal } from "../../modals/createTaskModal";
 export async function createTask(app: ClickUpApp, read: IRead, modify: IModify, context: SlashCommandContext, persistence: IPersistence, http: IHttp): Promise<void> {
     const block = modify.getCreator().getBlockBuilder();
     const triggerId = context.getTriggerId();
-
-    // console.log(triggerId);
-    // const ctmodal = await createTaskModal({modify,read,persistence,http,slashcommandcontext:context});
-    // await modify.getUiController().openModalView(
-    //         ctmodal,
-    //         {triggerId},
-    //         context.getSender(),
-            
-    //     );
-
     if(triggerId){
         console.log(triggerId);
         const modal = await createTaskModal({modify,read,persistence,http,slashcommandcontext:context});
