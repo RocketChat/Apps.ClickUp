@@ -39,13 +39,14 @@ export class ClickUp implements ISlashCommand {
                 await authorize(this.app, read, modify, context.getSender(), persistence);
                 break;
             case Subcommands.CreateTask:
-                if(triggerId){
-                    console.log(triggerId);
-                    const modal = await createTaskModal({modify,read,persistence,http,slashcommandcontext:context});
-                    await modify.getUiController().openModalView(modal,{triggerId},context.getSender());
-                }else{
-                    console.log("Inavlid Trigger ID !");
-                }
+                await createTask(this.app, read, modify, context, persistence, http);
+                // if(triggerId){
+                //     console.log(triggerId);
+                //     const modal = await createTaskModal({modify,read,persistence,http,slashcommandcontext:context});
+                //     await modify.getUiController().openModalView(modal,{triggerId},context.getSender());
+                // }else{
+                //     console.log("Inavlid Trigger ID !");
+                // }
                 break;
             default:
                 await this.displayAppHelpMessage(read, modify, context.getSender(), context.getRoom());
