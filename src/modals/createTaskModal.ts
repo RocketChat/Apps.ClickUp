@@ -34,7 +34,6 @@ export async function createTaskModal({ modify, read, persistence, http, slashco
             multiline : true,
         })
     });
-  
     block.addActionsBlock({
         elements: [
             block.newButtonElement({
