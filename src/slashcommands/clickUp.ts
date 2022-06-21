@@ -14,6 +14,8 @@ import { ClickUpApp } from '../../ClickUpApp';
 import { Subcommands } from '../enums/Subcommands';
 import { sendNotification } from '../lib/message';
 import { authorize } from './subcommands/authorize';
+import {createTask} from './subcommands/createTask';
+import { createTaskModal } from "../modals/createTaskModal";
 
 export class ClickUp implements ISlashCommand {
     public command = 'clickup-app';
@@ -26,7 +28,8 @@ export class ClickUp implements ISlashCommand {
 
     public async executor(context: SlashCommandContext, read: IRead, modify: IModify, http: IHttp, persistence: IPersistence): Promise<void> {
         const command = this.getCommandFromContextArguments(context);
-
+        const triggerId = context.getTriggerId();
+        console.log(triggerId);
         if (!command) {
             return await this.displayAppHelpMessage(read, modify, context.getSender(), context.getRoom());
         }
@@ -35,7 +38,9 @@ export class ClickUp implements ISlashCommand {
             case Subcommands.Auth:
                 await authorize(this.app, read, modify, context.getSender(), persistence);
                 break;
-            case Subcommands.Help:
+            case Subcommands.CreateTask:
+                await createTask(this.app, read, modify, context, persistence, http);
+                break;
             default:
                 await this.displayAppHelpMessage(read, modify, context.getSender(), context.getRoom());
                 break;

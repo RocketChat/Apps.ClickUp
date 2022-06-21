@@ -1,0 +1,15 @@
+export enum ModalsEnum {
+    CREATE_TASK_MODAL_NAME = 'Create New Task ✏️',
+    CREATE_TASK = 'create-task',
+    CREATE_TASK_WITH_ROOM = 'create-task-with-room',
+    CREATE_TASK_LABEL = 'Create Task',
+    CREATE_TASK_WITH_ROOM_LABEL= 'Create Task & Room of Assignnees',
+    TASK_NAME_INPUT_LABEL = 'Enter Task Name',
+    TASK_NAME_INPUT_LABEL_DEFAULT = 'enter the task name here',
+    TASK_NAME_INPUT = 'task-name',
+    TASK_NAME_BLOCK = 'task-name-block',
+    TASK_DESCRIPTION_BLOCK = 'task-description-block',
+    TASK_DESCRIPTION_INPUT_LABEL = 'Enter Task Description',
+    TASK_DESCRIPTION_INPUT_LABEL_DEFAULT = 'enter the task description here',
+    TASK_DESCRIPTION_INPUT = 'task-description',
+}
