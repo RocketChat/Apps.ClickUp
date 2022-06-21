@@ -9,24 +9,41 @@ import { SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashco
 import { UIKitBlockInteractionContext, UIKitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
 
 export async function createTaskModal({ modify, read, persistence, http, slashcommandcontext, uikitcontext }: { modify: IModify, read: IRead, persistence: IPersistence, http: IHttp ,slashcommandcontext?: SlashCommandContext, uikitcontext?: UIKitInteractionContext }): Promise<IUIKitModalViewParam> {
-    const viewId = ModalsEnum.PULL_VIEW;
+    const viewId = ModalsEnum.CREATE_TASK;
 
     const block = modify.getCreator().getBlockBuilder();
 
     const room = slashcommandcontext?.getRoom() || uikitcontext?.getInteractionData().room;
     const user = slashcommandcontext?.getSender() || uikitcontext?.getInteractionData().user;
-    console.log("call ho raha  hai");
-
+    block.addInputBlock({
+        blockId: ModalsEnum.TASK_NAME_BLOCK,
+        label: { text: ModalsEnum.TASK_NAME_INPUT_LABEL, type: TextObjectType.PLAINTEXT },
+        element: block.newPlainTextInputElement({
+            actionId: ModalsEnum.TASK_NAME_INPUT,
+            placeholder: { text: '', type: TextObjectType.PLAINTEXT },
+            initialValue: ModalsEnum.TASK_NAME_INPUT_LABEL_DEFAULT,
+        })
+    });
+    block.addInputBlock({
+        blockId: ModalsEnum.TASK_DESCRIPTION_BLOCK,
+        label: { text: ModalsEnum.TASK_DESCRIPTION_INPUT_LABEL, type: TextObjectType.PLAINTEXT },
+        element: block.newPlainTextInputElement({
+            actionId: ModalsEnum.TASK_DESCRIPTION_INPUT,
+            placeholder: { text: '', type: TextObjectType.PLAINTEXT },
+            initialValue: ModalsEnum.TASK_DESCRIPTION_INPUT_LABEL_DEFAULT,
+            multiline : true,
+        })
+    });
     block.addActionsBlock({
         elements: [
             block.newButtonElement({
-                actionId: ModalsEnum.MERGE_PULL_REQUEST_ACTION,
-                text: { text: ModalsEnum.MERGE_PULL_REQUEST_LABEL, type: TextObjectType.PLAINTEXT },
+                actionId: ModalsEnum.CREATE_TASK,
+                text: { text: ModalsEnum.CREATE_TASK_LABEL, type: TextObjectType.PLAINTEXT },
                 value: room?.id
             }),
             block.newButtonElement({
-                actionId: ModalsEnum.COMMENT_PR_ACTION,
-                text: { text: ModalsEnum.COMMENT_PR_LABEL, type: TextObjectType.PLAINTEXT },
+                actionId: ModalsEnum.CREATE_TASK_WITH_ROOM,
+                text: { text: ModalsEnum.CREATE_TASK_WITH_ROOM_LABEL, type: TextObjectType.PLAINTEXT },
                 value: room?.id
             }),
         ]
