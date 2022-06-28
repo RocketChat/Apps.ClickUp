@@ -47,7 +47,7 @@ function isUserPresent(users: IUser[], targetUser: IUser): boolean {
   * @NOTE It relies on hardcoded information (config alias's suffix) to work and it might break if
   * the value changes
   */
-export async function getAccessTokenForUser(read: IRead, user: IUser, config: IOAuth2ClientOptions): Promise<IAuthData | undefined> {
+export async function getAccessTokenForUser(read: IRead, user: IUser): Promise<IAuthData | undefined> {
         const associations = [
             new RocketChatAssociationRecord(
                 RocketChatAssociationModel.USER,
@@ -55,7 +55,7 @@ export async function getAccessTokenForUser(read: IRead, user: IUser, config: IO
             ),
             new RocketChatAssociationRecord(
                 RocketChatAssociationModel.MISC,
-                `${config.alias}-oauth-connection`,
+                `clickup-app-oauth-connection`,
             ),
         ];
 
