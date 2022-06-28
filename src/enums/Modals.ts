@@ -4,6 +4,10 @@ export enum ModalsEnum {
     CREATE_TASK_WITH_ROOM = 'create-task-with-room',
     CREATE_TASK_LABEL = 'Create Task',
     CREATE_TASK_WITH_ROOM_LABEL= 'Create Task & Room of Assignnees',
+    LIST_ID_INPUT_LABEL = 'Enter List ID',
+    LIST_ID_INPUT_LABEL_DEFAULT = 'enter the list ID to which task is to be added',
+    LIST_ID_INPUT = 'list-id',
+    LIST_ID_BLOCK = 'list-id-block',
     TASK_NAME_INPUT_LABEL = 'Enter Task Name',
     TASK_NAME_INPUT_LABEL_DEFAULT = 'enter the task name here',
     TASK_NAME_INPUT = 'task-name',
@@ -12,4 +16,9 @@ export enum ModalsEnum {
     TASK_DESCRIPTION_INPUT_LABEL = 'Enter Task Description',
     TASK_DESCRIPTION_INPUT_LABEL_DEFAULT = 'enter the task description here',
     TASK_DESCRIPTION_INPUT = 'task-description',
+    TASK_ASSIGNEES_BLOCK = 'task-assignees-block',
+    TASK_ASSIGNEES_INPUT_LABEL = 'Enter Usernames of Task Assignees',
+    TASK_ASSIGNEES_INPUT_LABEL_DEFAULT = 'enter comma separated usernames here',
+    TASK_ASSIGNEES_INPUT = 'assignees-usernames',
+    
 }

@@ -16,6 +16,15 @@ export async function createTaskModal({ modify, read, persistence, http, slashco
     const room = slashcommandcontext?.getRoom() || uikitcontext?.getInteractionData().room;
     const user = slashcommandcontext?.getSender() || uikitcontext?.getInteractionData().user;
     block.addInputBlock({
+        blockId: ModalsEnum.LIST_ID_BLOCK,
+        label: { text: ModalsEnum.LIST_ID_INPUT_LABEL, type: TextObjectType.PLAINTEXT },
+        element: block.newPlainTextInputElement({
+            actionId: ModalsEnum.LIST_ID_INPUT,
+            placeholder: { text: '', type: TextObjectType.PLAINTEXT },
+            initialValue: ModalsEnum.LIST_ID_INPUT_LABEL_DEFAULT,
+        })
+    });
+    block.addInputBlock({
         blockId: ModalsEnum.TASK_NAME_BLOCK,
         label: { text: ModalsEnum.TASK_NAME_INPUT_LABEL, type: TextObjectType.PLAINTEXT },
         element: block.newPlainTextInputElement({
@@ -34,20 +43,31 @@ export async function createTaskModal({ modify, read, persistence, http, slashco
             multiline : true,
         })
     });
-    block.addActionsBlock({
-        elements: [
-            block.newButtonElement({
-                actionId: ModalsEnum.CREATE_TASK,
-                text: { text: ModalsEnum.CREATE_TASK_LABEL, type: TextObjectType.PLAINTEXT },
-                value: room?.id
-            }),
-            block.newButtonElement({
-                actionId: ModalsEnum.CREATE_TASK_WITH_ROOM,
-                text: { text: ModalsEnum.CREATE_TASK_WITH_ROOM_LABEL, type: TextObjectType.PLAINTEXT },
-                value: room?.id
-            }),
-        ]
+    block.addInputBlock({
+        blockId: ModalsEnum.TASK_ASSIGNEES_BLOCK,
+        label: { text: ModalsEnum.TASK_ASSIGNEES_INPUT_LABEL, type: TextObjectType.PLAINTEXT },
+        element: block.newPlainTextInputElement({
+            actionId: ModalsEnum.TASK_ASSIGNEES_INPUT,
+            placeholder: { text: '', type: TextObjectType.PLAINTEXT },
+            initialValue: ModalsEnum.TASK_ASSIGNEES_INPUT_LABEL_DEFAULT,
+        })
     });
+
+    // To be added when Rocket.Chat 5.0 releases when dispatchment of actions from input elements will be allowed.
+    // block.addActionsBlock({
+    //     elements: [
+    //         block.newButtonElement({
+    //             actionId: ModalsEnum.CREATE_TASK,
+    //             text: { text: ModalsEnum.CREATE_TASK_LABEL, type: TextObjectType.PLAINTEXT },
+    //             value: room?.id
+    //         }),
+    //         block.newButtonElement({
+    //             actionId: ModalsEnum.CREATE_TASK_WITH_ROOM,
+    //             text: { text: ModalsEnum.CREATE_TASK_WITH_ROOM_LABEL, type: TextObjectType.PLAINTEXT },
+    //             value: room?.id
+    //         }),
+    //     ]
+    // });
 
     return {
         id: viewId,
@@ -60,6 +80,9 @@ export async function createTaskModal({ modify, read, persistence, http, slashco
                 type: TextObjectType.PLAINTEXT,
                 text: 'Close',
             },
+        }),
+        submit: block.newButtonElement({
+            text: block.newPlainTextObject("Create Task"),
         }),
         blocks: block.getBlocks(),
     };

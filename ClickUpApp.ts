@@ -18,7 +18,9 @@ import { create as registerAuthorizedUser } from './src/storage/users';
 import { IMessageButonActions } from './IClickUpApp';
 import { createSectionBlock } from './src/lib/blocks';
 import { ClickUp as ClickUpCommand } from './src/slashcommands/clickUp';
-
+import { IUIKitInteractionHandler, IUIKitResponse, UIKitBlockInteractionContext, UIKitViewCloseInteractionContext, UIKitViewSubmitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
+import { ExecuteBlockActionHandler } from './src/handlers/ExecuteBlockActionHandler';
+import { ExecuteViewSubmitHandler } from './src/handlers/ExecuteViewSubmitHandler';
 export class ClickUpApp extends App {
 
     public botUsername: string;
@@ -28,7 +30,7 @@ export class ClickUpApp extends App {
         super(info, logger, accessors);
     }
 
-    private oauth2ClientInstance: IOAuth2Client;
+    public oauth2ClientInstance: IOAuth2Client;
     private oauth2Config: IOAuth2ClientOptions = {
         alias: 'clickup-app',
        accessTokenUri: 'https://api.clickup.com/api/v2/oauth/token',
@@ -105,6 +107,16 @@ export class ClickUpApp extends App {
         return this.oauth2ClientInstance;
     }
 
+    public async executeBlockActionHandler(context: UIKitBlockInteractionContext, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify): Promise<IUIKitResponse> {
+        const handler = new ExecuteBlockActionHandler(this, read, http, modify, persistence);
+        return await handler.run(context);
+    }
+
+    public async executeViewSubmitHandler(context: UIKitViewSubmitInteractionContext, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify) {
+        const handler = new ExecuteViewSubmitHandler(this, read, http, modify, persistence);
+        return await handler.run(context,read, http, persistence, modify);
+	}
+    
     protected async extendConfiguration(
         configuration: IConfigurationExtend,
     ): Promise<void> {
