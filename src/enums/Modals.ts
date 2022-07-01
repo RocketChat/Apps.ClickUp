@@ -20,5 +20,6 @@ export enum ModalsEnum {
     TASK_ASSIGNEES_INPUT_LABEL = 'Enter Usernames of Task Assignees',
     TASK_ASSIGNEES_INPUT_LABEL_DEFAULT = 'enter comma separated usernames here',
     TASK_ASSIGNEES_INPUT = 'assignees-usernames',
+    GET_TASKS = 'get-tasks',
     
 }

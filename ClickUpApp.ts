@@ -30,7 +30,7 @@ export class ClickUpApp extends App {
         super(info, logger, accessors);
     }
 
-    public oauth2ClientInstance: IOAuth2Client;
+    private oauth2ClientInstance: IOAuth2Client;
     private oauth2Config: IOAuth2ClientOptions = {
         alias: 'clickup-app',
        accessTokenUri: 'https://api.clickup.com/api/v2/oauth/token',
@@ -116,7 +116,7 @@ export class ClickUpApp extends App {
         const handler = new ExecuteViewSubmitHandler(this, read, http, modify, persistence);
         return await handler.run(context,read, http, persistence, modify);
 	}
-    
+
     protected async extendConfiguration(
         configuration: IConfigurationExtend,
     ): Promise<void> {

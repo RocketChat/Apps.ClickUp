@@ -30,29 +30,7 @@ export async function getTasks({
     http: IHttp;
 }) {
     
-    const api_response = await http.post(
-        `https://api.clickup.com/api/v2/list/tasks`
-    );
-    if(api_response.statusCode == 200){
-        const textSender = modify
-        .getCreator()
-        .startMessage()
-        .setText(`*TASK CREATED SUCCESSFULLY!*`);
-        if (room) {
-            textSender.setRoom(room);
-        }
-        await modify.getCreator().finish(textSender);
-    }
-    else {
-        const textSender = modify
-        .getCreator()
-        .startMessage()
-        .setText(`*UNABLE TO CREATE TASK!*`);
-        if (room) {
-            textSender.setRoom(room);
-        }
-        await modify.getCreator().finish(textSender);
-    }
+    //to be implemented next week.
 
     
 }
