@@ -35,17 +35,16 @@ export async function postTask({
     modify: IModify;
     http: IHttp;
 }) {
-    // const { state }: ICreateTaskState = data.view as any;
     const state = data.view.state;
     const user: IUser = context.getInteractionData().user;
     const token = await getAccessTokenForUser(read, user);
     const list_id = state?.[ModalsEnum.LIST_ID_BLOCK]?.[ModalsEnum.LIST_ID_INPUT];
     const taskName = state?.[ModalsEnum.TASK_NAME_BLOCK]?.[ModalsEnum.TASK_NAME_INPUT];
     const taskDescription = state?.[ModalsEnum.TASK_DESCRIPTION_BLOCK]?.[ModalsEnum.TASK_DESCRIPTION_INPUT];
-    const headers: any = {
+    const headers = {
         Authorization: `${token?.token}`,
     };
-    const body: any = {
+    const body = {
         'name': `${taskName}`,
         'description': `${taskDescription}`,
     }

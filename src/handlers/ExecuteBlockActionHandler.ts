@@ -27,23 +27,12 @@ export class ExecuteBlockActionHandler {
     public async run(
         context: UIKitBlockInteractionContext
     ): Promise<IUIKitResponse> {
-        console.log("reaching block action handler");
         const data = context.getInteractionData();
         const { actionId, user } = data;
 
         switch (actionId) {
-            case "trial": {
-
-        try {
-			this.app.getLogger().info(data);
-            // await postTask({context,data,room,read,persistence,modify,http});
-            console.log("block action hanler reached");
-                } catch (error) {
-            this.app.getLogger().error(error);
-                //code for creating new task
-            }
-        }
-    }
+    // To be added when Rocket.Chat 5.0 releases when dispatchment of actions from input elements will be allowed.
+}
 
         return context.getInteractionResponder().successResponse();
     }
