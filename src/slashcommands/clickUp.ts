@@ -15,7 +15,7 @@ import { Subcommands } from '../enums/Subcommands';
 import { sendNotification } from '../lib/message';
 import { authorize } from './subcommands/authorize';
 import {createTask} from './subcommands/createTask';
-import { createTaskModal } from "../modals/createTaskModal";
+import {getTasks} from './subcommands/getTasks';
 
 export class ClickUp implements ISlashCommand {
     public command = 'clickup-app';
@@ -38,6 +38,9 @@ export class ClickUp implements ISlashCommand {
                 break;
             case Subcommands.CreateTask:
                 await createTask(this.app, read, modify, context, persistence, http);
+                break;
+            case Subcommands.GetTasks:
+                await getTasks(this.app, read, modify, context, persistence, http);
                 break;
             default:
                 break;

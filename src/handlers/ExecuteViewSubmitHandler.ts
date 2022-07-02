@@ -7,6 +7,7 @@ import { ClickUpApp } from '../../ClickUpApp';
 import { postTask } from '../lib/postTask';
 import { SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashcommands';
 import { getUIData } from '../lib/persistence';
+import { getTasks } from '../lib/getTasks';
 
 export class ExecuteViewSubmitHandler {
 	constructor(
@@ -31,13 +32,12 @@ export class ExecuteViewSubmitHandler {
             
 		switch (view.id) {
             case ModalsEnum.CREATE_TASK:
-                if (user.id) {
-                    if (roomId) {
-                            const taskResult = await postTask({context,data,room,read,persistence,modify,http});
-                            return context.getInteractionResponder().successResponse();                        
-                                }
-                            }
+                await postTask({context,data,room,read,persistence,modify,http});
+                return context.getInteractionResponder().successResponse();                        
                 break;
+            case ModalsEnum.GET_TASKS:
+                await getTasks({context,data,room,read,persistence,modify,http});
+                return context.getInteractionResponder().successResponse();    
 			default:
                 break;
 		}

@@ -78,7 +78,7 @@ export async function createTaskModal({ modify, read, persistence, http, slashco
             },
         }),
         submit: block.newButtonElement({
-            text: block.newPlainTextObject("Create Task"),
+            text: block.newPlainTextObject(ModalsEnum.CREATE_TASK_SUBMIT_BUTTON_LABEL),
         }),
         blocks: block.getBlocks(),
     };
