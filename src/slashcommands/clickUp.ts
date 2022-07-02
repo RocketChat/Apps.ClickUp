@@ -28,8 +28,6 @@ export class ClickUp implements ISlashCommand {
 
     public async executor(context: SlashCommandContext, read: IRead, modify: IModify, http: IHttp, persistence: IPersistence): Promise<void> {
         const command = this.getCommandFromContextArguments(context);
-        const triggerId = context.getTriggerId();
-        console.log(triggerId);
         if (!command) {
             return await this.displayAppHelpMessage(read, modify, context.getSender(), context.getRoom());
         }
@@ -42,7 +40,6 @@ export class ClickUp implements ISlashCommand {
                 await createTask(this.app, read, modify, context, persistence, http);
                 break;
             default:
-                await this.displayAppHelpMessage(read, modify, context.getSender(), context.getRoom());
                 break;
         }
     }
