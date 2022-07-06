@@ -3,4 +3,5 @@ export enum Subcommands {
     Auth = 'auth',
     CheckForUserTasks = 'tasks',
     CreateTask = 'create',
+    GetTasks = 'get',
 };

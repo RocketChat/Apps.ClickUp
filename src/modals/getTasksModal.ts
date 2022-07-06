@@ -8,7 +8,6 @@ import { SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashco
 import { UIKitBlockInteractionContext, UIKitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
 
 export async function getTasksModal({ modify, read, persistence, http, slashcommandcontext, uikitcontext }: { modify: IModify, read: IRead, persistence: IPersistence, http: IHttp ,slashcommandcontext?: SlashCommandContext, uikitcontext?: UIKitInteractionContext }): Promise<IUIKitModalViewParam> {
-    //To be implemented this week.
     const viewId = ModalsEnum.GET_TASKS;
     const block = modify.getCreator().getBlockBuilder();
     block.addInputBlock({
@@ -21,55 +20,50 @@ export async function getTasksModal({ modify, read, persistence, http, slashcomm
         })
     });
     block.addInputBlock({
-        blockId: ModalsEnum.TASK_NAME_BLOCK,
-        label: { text: ModalsEnum.TASK_NAME_INPUT_LABEL, type: TextObjectType.PLAINTEXT },
+        blockId: ModalsEnum.TASK_LIMIT_BLOCK,
+        label: { text: ModalsEnum.TASK_LIMIT_INPUT_LABEL, type: TextObjectType.PLAINTEXT },
         element: block.newPlainTextInputElement({
-            actionId: ModalsEnum.TASK_NAME_INPUT,
+            actionId: ModalsEnum.TASK_LIMIT_INPUT,
             placeholder: { text: '', type: TextObjectType.PLAINTEXT },
-            initialValue: ModalsEnum.TASK_NAME_INPUT_LABEL_DEFAULT,
-        })
-    });
-    block.addInputBlock({
-        blockId: ModalsEnum.TASK_DESCRIPTION_BLOCK,
-        label: { text: ModalsEnum.TASK_DESCRIPTION_INPUT_LABEL, type: TextObjectType.PLAINTEXT },
-        element: block.newPlainTextInputElement({
-            actionId: ModalsEnum.TASK_DESCRIPTION_INPUT,
-            placeholder: { text: '', type: TextObjectType.PLAINTEXT },
-            initialValue: ModalsEnum.TASK_DESCRIPTION_INPUT_LABEL_DEFAULT,
-            multiline : true,
-        })
-    });
-    block.addInputBlock({
-        blockId: ModalsEnum.TASK_ASSIGNEES_BLOCK,
-        label: { text: ModalsEnum.TASK_ASSIGNEES_INPUT_LABEL, type: TextObjectType.PLAINTEXT },
-        element: block.newPlainTextInputElement({
-            actionId: ModalsEnum.TASK_ASSIGNEES_INPUT,
-            placeholder: { text: '', type: TextObjectType.PLAINTEXT },
-            initialValue: ModalsEnum.TASK_ASSIGNEES_INPUT_LABEL_DEFAULT,
+            initialValue: ModalsEnum.TASK_LIMIT_INPUT_LABEL_DEFAULT,
         })
     });
 
-    // To be added when Rocket.Chat 5.0 releases when dispatchment of actions from input elements will be allowed.
-    // block.addActionsBlock({
-    //     elements: [
-    //         block.newButtonElement({
-    //             actionId: ModalsEnum.CREATE_TASK,
-    //             text: { text: ModalsEnum.CREATE_TASK_LABEL, type: TextObjectType.PLAINTEXT },
-    //             value: room?.id
-    //         }),
-    //         block.newButtonElement({
-    //             actionId: ModalsEnum.CREATE_TASK_WITH_ROOM,
-    //             text: { text: ModalsEnum.CREATE_TASK_WITH_ROOM_LABEL, type: TextObjectType.PLAINTEXT },
-    //             value: room?.id
-    //         }),
-    //     ]
-    // });
+    block.addSectionBlock({
+        text: {
+            text: ModalsEnum.OPTIONAL_PARAMETERS_LABEL,
+            type: TextObjectType.PLAINTEXT,
+        },
+    });
+
+    block.addActionsBlock({
+        blockId: ModalsEnum.ARCHIVED_BLOCK,
+        elements: [
+            block.newStaticSelectElement({
+                actionId: ModalsEnum.ARCHIVED_ACTION_ID,
+                placeholder: block.newPlainTextObject(ModalsEnum.ARCHIVED_PLACEHOLDER),
+                options: [{ text: { type: TextObjectType.PLAINTEXT, text: 'Yes' }, value: 'Yes' }, { text: { type: TextObjectType.PLAINTEXT, text: 'No' }, value: 'No' }],
+                initialValue: 'No',
+            }),
+        ],
+    });
+    block.addActionsBlock({
+        blockId: ModalsEnum.SUBTASKS_BLOCK,
+        elements: [
+            block.newStaticSelectElement({
+                actionId: ModalsEnum.SUBTASKS_ACTION_ID,
+                placeholder: block.newPlainTextObject(ModalsEnum.SUBTASKS_PLACEHOLDER),
+                options: [{ text: { type: TextObjectType.PLAINTEXT, text: 'Yes' }, value: 'Yes' }, { text: { type: TextObjectType.PLAINTEXT, text: 'No' }, value: 'No' }],
+                initialValue: 'No',
+            }),
+        ],
+    });
 
     return {
         id: viewId,
         title: {
             type: TextObjectType.PLAINTEXT,
-            text: ModalsEnum.CREATE_TASK_MODAL_NAME,
+            text: ModalsEnum.GET_TASKS_MODAL_NAME,
         },
         close: block.newButtonElement({
             text: {
@@ -78,7 +72,7 @@ export async function getTasksModal({ modify, read, persistence, http, slashcomm
             },
         }),
         submit: block.newButtonElement({
-            text: block.newPlainTextObject("Create Task"),
+            text: block.newPlainTextObject(ModalsEnum.GET_TASKS_SUBMIT_BUTTON_LABEL),
         }),
         blocks: block.getBlocks(),
     };
