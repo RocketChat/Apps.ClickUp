@@ -7,7 +7,7 @@ import {
     IRead,
 } from "@rocket.chat/apps-engine/definition/accessors";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
-import { IUIKitResponse, TextObjectType, UIKitViewSubmitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
+import { IUIKitResponse, TextObjectType, UIKitViewSubmitInteractionContext , ButtonStyle} from '@rocket.chat/apps-engine/definition/uikit';
 import {
     ISlashCommand,
     SlashCommandContext,
@@ -17,6 +17,7 @@ import { ICreateTaskState } from "../facade/IClickUpService";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { getAccessTokenForUser } from "../storage/users";
 import { ModalsEnum } from "../enums/Modals";
+import { MiscEnum } from "../enums/Misc";
 
 export async function getTasks({
     context,
@@ -41,8 +42,9 @@ export async function getTasks({
     const list_id = state?.[ModalsEnum.LIST_ID_BLOCK]?.[ModalsEnum.LIST_ID_INPUT];
     const archived = state?.[ModalsEnum.ARCHIVED_BLOCK]?.[ModalsEnum.ARCHIVED_ACTION_ID] == "Yes"?"true":"false";
     const subtasks = state?.[ModalsEnum.SUBTASKS_BLOCK]?.[ModalsEnum.SUBTASKS_ACTION_ID] == "Yes"?"true":"false";
-    var taskLimit = state?.[ModalsEnum.TASK_LIMIT_BLOCK]?.[ModalsEnum.TASK_LIMIT_INPUT];
-    taskLimit < 101 ? taskLimit: 100;
+    const taskLimit = state?.[ModalsEnum.TASK_LIMIT_BLOCK]?.[ModalsEnum.TASK_LIMIT_INPUT];
+    var limit = taskLimit;
+    limit > 101 ? 100: limit = taskLimit;
 
     const headers = {
         Authorization: `${token?.token}`,
@@ -51,17 +53,46 @@ export async function getTasks({
     const response = await http.get(`https://api.clickup.com/api/v2/list/${list_id}/task?archived=${archived}&subtasks=${subtasks}`,{ headers });
     if(response.statusCode==200) {
         response.data.tasks.forEach(async (task) => {
-            if (taskLimit--) {
-                const textSender = await modify
-                    .getCreator()
-                    .startMessage()
-                    .setText(
-                        `[${task.name}](${task.url})\n` + `${task.description}`.slice(0, 80) + '...'
-                    );
-                if (room) {
-                    textSender.setRoom(room);
-                }
-                await modify.getCreator().finish(textSender);
+            if (limit == 0) return;
+            if (limit--) {
+                    const builder = await modify.getCreator().startMessage().setRoom(room);
+                    const block = modify.getCreator().getBlockBuilder();
+                    block.addSectionBlock({
+                        text: block.newPlainTextObject(`${task.name}`),
+                    });
+                    block.addContextBlock({ elements: [ block.newPlainTextObject(`Description: `+`${task.description}`.slice(0, 80) + `...`)]});
+                    block.addActionsBlock({
+                        blockId: MiscEnum.TASK_ACTIONS_BLOCK,
+                        elements: [
+                            block.newButtonElement({
+                                actionId: MiscEnum.VIEW_TASK_ACTION_ID,
+                                text: block.newPlainTextObject(MiscEnum.VIEW_TASK_BUTTON),
+                                value: `${task.url}`,
+                                url: `${task.url}`,
+                            }),
+                            block.newButtonElement({
+                                actionId: MiscEnum.SHARE_TASK_ACTION_ID,
+                                text: block.newPlainTextObject(MiscEnum.SHARE_TASK_BUTTON),
+                                value: `${task.id}`,
+                                style: ButtonStyle.PRIMARY,
+                            }),
+                            block.newButtonElement({
+                                actionId: MiscEnum.EDIT_TASK_ACTION_ID,
+                                text: block.newPlainTextObject(MiscEnum.EDIT_TASK_BUTTON),
+                                value: `${task.id}`,
+                            }),
+                            block.newButtonElement({
+                                actionId: MiscEnum.DELETE_TASK_ACTION_ID,
+                                text: block.newPlainTextObject(MiscEnum.DELETE_TASK_BUTTON),
+                                value: `${task.id}`,
+                                style: ButtonStyle.DANGER,
+                            }),
+                        ],
+                    });
+                    builder.setBlocks(block);
+                await modify
+                .getNotifier()
+                .notifyUser(user, builder.getMessage());;
             }
         });
     }

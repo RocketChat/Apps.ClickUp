@@ -4,7 +4,7 @@ import { IUIKitModalViewParam } from '@rocket.chat/apps-engine/definition/uikit/
 import { ModalsEnum } from '../enums/Modals';
 import { AppEnum } from '../enums/App';
 import { SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashcommands';
-import { UIKitBlockInteractionContext, UIKitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
+import { UIKitBlockInteractionContext, UIKitInteractionContext, BlockElementType } from '@rocket.chat/apps-engine/definition/uikit';
 
 export async function createTaskModal({ modify, read, persistence, http, slashcommandcontext, uikitcontext }: { modify: IModify, read: IRead, persistence: IPersistence, http: IHttp ,slashcommandcontext?: SlashCommandContext, uikitcontext?: UIKitInteractionContext }): Promise<IUIKitModalViewParam> {
     const viewId = ModalsEnum.CREATE_TASK;
@@ -39,6 +39,26 @@ export async function createTaskModal({ modify, read, persistence, http, slashco
             multiline : true,
         })
     });
+
+    block.addInputBlock({
+        blockId: ModalsEnum.TASK_START_DATE_BLOCK,
+        label: { text: ModalsEnum.TASK_START_DATE_INPUT_LABEL, type: TextObjectType.PLAINTEXT },
+        element: {
+            placeholder: { text: '', type: TextObjectType.PLAINTEXT },
+            type: 'datepicker' as BlockElementType,
+            actionId: ModalsEnum.TASK_START_DATE_INPUT,
+        },
+    });
+
+    block.addInputBlock({
+        blockId: ModalsEnum.TASK_DUE_DATE_BLOCK,
+        label: { text: ModalsEnum.TASK_DUE_DATE_INPUT_LABEL, type: TextObjectType.PLAINTEXT },
+        element: {
+            placeholder: { text: '', type: TextObjectType.PLAINTEXT },
+            type: 'datepicker' as BlockElementType,
+            actionId: ModalsEnum.TASK_DUE_DATE_INPUT,
+        },
+    });
     block.addInputBlock({
         blockId: ModalsEnum.TASK_ASSIGNEES_BLOCK,
         label: { text: ModalsEnum.TASK_ASSIGNEES_INPUT_LABEL, type: TextObjectType.PLAINTEXT },
@@ -48,7 +68,6 @@ export async function createTaskModal({ modify, read, persistence, http, slashco
             initialValue: ModalsEnum.TASK_ASSIGNEES_INPUT_LABEL_DEFAULT,
         })
     });
-
     // To be added when Rocket.Chat 5.0 releases when dispatchment of actions from input elements will be allowed.
     // block.addActionsBlock({
     //     elements: [

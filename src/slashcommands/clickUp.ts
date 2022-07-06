@@ -54,9 +54,11 @@ export class ClickUp implements ISlashCommand {
 
     private async displayAppHelpMessage(read: IRead, modify: IModify, user: IUser, room: IRoom): Promise<void> {
         const text = `ClickUp App provides you the following slash commands, /clickup-app:
-*help:* shows this list;
-*auth:* starts the process to authorize ClickUp Account;
-        `;
+
+    1) *help:* shows this list;
+    2) *auth:* starts the process to authorize your ClickUp Account;
+    3) *create* lets you create a new task.
+    4) *get* lets you retreive your tasks.    `;
 
         return sendNotification(read, modify, user, room, text);
     }

@@ -41,12 +41,17 @@ export async function postTask({
     const list_id = state?.[ModalsEnum.LIST_ID_BLOCK]?.[ModalsEnum.LIST_ID_INPUT];
     const taskName = state?.[ModalsEnum.TASK_NAME_BLOCK]?.[ModalsEnum.TASK_NAME_INPUT];
     const taskDescription = state?.[ModalsEnum.TASK_DESCRIPTION_BLOCK]?.[ModalsEnum.TASK_DESCRIPTION_INPUT];
+    const taskstartDate = Math.floor(new Date(state?.[ModalsEnum.TASK_START_DATE_BLOCK]?.[ModalsEnum.TASK_START_DATE_INPUT]).getTime() / 1000);
+    const taskdueDate = Math.floor(new Date(state?.[ModalsEnum.TASK_DUE_DATE_BLOCK]?.[ModalsEnum.TASK_DUE_DATE_INPUT]).getTime() / 1000);
+    
     const headers = {
         Authorization: `${token?.token}`,
     };
     const body = {
         'name': `${taskName}`,
         'description': `${taskDescription}`,
+        'due_date':`${taskdueDate}`,
+        'start_date': `${taskstartDate}`,
     }
 
     const response = await http.post(`https://api.clickup.com/api/v2/list/${list_id}/task`,{ headers , data: body});

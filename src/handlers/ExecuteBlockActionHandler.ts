@@ -12,8 +12,12 @@ import {
     IUIKitResponse,
     UIKitBlockInteractionContext,
 } from "@rocket.chat/apps-engine/definition/uikit";
-import { getAccessTokenForUser } from '../storage/users';
-import { postTask } from "../lib/postTask";
+import {  UIKitInteractionContext} from '@rocket.chat/apps-engine/definition/uikit';
+import { MiscEnum } from "../enums/Misc";
+import { SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashcommands';
+import { getUIData } from '../lib/persistence';
+import { shareTask } from "../lib/shareTask";
+import {deleteTask} from "../lib/deleteTask";
 
 export class ExecuteBlockActionHandler {
     constructor(
@@ -25,14 +29,39 @@ export class ExecuteBlockActionHandler {
     ) {}
 
     public async run(
-        context: UIKitBlockInteractionContext
+        context: UIKitBlockInteractionContext,read: IRead,
+        http: IHttp,
+        persistence: IPersistence,
+        modify: IModify,slashcommandcontext?: SlashCommandContext, uikitcontext?: UIKitInteractionContext
     ): Promise<IUIKitResponse> {
         const data = context.getInteractionData();
         const { actionId, user } = data;
+        const uiData = await getUIData(read.getPersistenceReader(), user.id);
+        const room = uiData.room;
+        const roomId  =  uiData.room?.id;
+    
 
-        switch (actionId) {
-    // To be added when Rocket.Chat 5.0 releases when dispatchment of actions from input elements will be allowed.
-}
+        try {
+            
+            switch (actionId) {
+                case MiscEnum.SHARE_TASK_ACTION_ID:
+                    await shareTask({context,data,room,read,persistence,modify,http});
+                    return context.getInteractionResponder().successResponse();                        
+                case MiscEnum.EDIT_TASK_ACTION_ID:
+                    // await getTasks({context,data,room,read,persistence,modify,http});
+                    return context.getInteractionResponder().successResponse();  
+                case MiscEnum.DELETE_TASK_ACTION_ID:
+                    await deleteTask({context,data,room,read,persistence,modify,http});
+                    return context.getInteractionResponder().successResponse();    
+                default:
+                    break;
+            }
+        } catch (error) {
+            return context.getInteractionResponder().viewErrorResponse({
+                viewId: actionId,
+                errors: error,
+            });
+        }
 
         return context.getInteractionResponder().successResponse();
     }

@@ -109,12 +109,12 @@ export class ClickUpApp extends App {
 
     public async executeBlockActionHandler(context: UIKitBlockInteractionContext, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify): Promise<IUIKitResponse> {
         const handler = new ExecuteBlockActionHandler(this, read, http, modify, persistence);
-        return await handler.run(context);
+        return await handler.run(context, read, http, persistence, modify);
     }
 
     public async executeViewSubmitHandler(context: UIKitViewSubmitInteractionContext, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify) {
         const handler = new ExecuteViewSubmitHandler(this, read, http, modify, persistence);
-        return await handler.run(context,read, http, persistence, modify);
+        return await handler.run(context, read, http, persistence, modify);
 	}
 
     protected async extendConfiguration(
