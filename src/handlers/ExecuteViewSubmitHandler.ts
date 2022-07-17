@@ -8,6 +8,7 @@ import { postTask } from '../lib/postTask';
 import { SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashcommands';
 import { getUIData } from '../lib/persistence';
 import { getTasks } from '../lib/getTasks';
+import { updateTask } from '../lib/updateTask';
 
 export class ExecuteViewSubmitHandler {
 	constructor(
@@ -38,6 +39,9 @@ export class ExecuteViewSubmitHandler {
             case ModalsEnum.GET_TASKS:
                 await getTasks({context,data,room,read,persistence,modify,http});
                 return context.getInteractionResponder().successResponse();    
+            case ModalsEnum.EDIT_TASK:
+                await updateTask({context,data,room,read,persistence,modify,http});
+                return context.getInteractionResponder().successResponse(); 
 			default:
                 break;
 		}

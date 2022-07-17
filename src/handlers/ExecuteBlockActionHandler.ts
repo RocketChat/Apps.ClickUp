@@ -17,7 +17,8 @@ import { MiscEnum } from "../enums/Misc";
 import { SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashcommands';
 import { getUIData } from '../lib/persistence';
 import { shareTask } from "../lib/shareTask";
-import {deleteTask} from "../lib/deleteTask";
+import { deleteTask } from "../lib/deleteTask";
+import { editTask } from "../lib/editTask";
 
 export class ExecuteBlockActionHandler {
     constructor(
@@ -33,7 +34,9 @@ export class ExecuteBlockActionHandler {
         read: IRead,
         http: IHttp,
         persistence: IPersistence,
-        modify: IModify,slashcommandcontext?: SlashCommandContext, uikitcontext?: UIKitInteractionContext
+        modify: IModify,
+        slashcommandcontext?: SlashCommandContext, 
+        uikitcontext?: UIKitInteractionContext
     ): Promise<IUIKitResponse> {
         const data = context.getInteractionData();
         const { actionId, user } = data;
@@ -49,8 +52,7 @@ export class ExecuteBlockActionHandler {
                     await shareTask({context,data,room,read,persistence,modify,http});
                     return context.getInteractionResponder().successResponse();                        
                 case MiscEnum.EDIT_TASK_ACTION_ID:
-                    //to be implemented next week
-                    // await editTask({context,data,room,read,persistence,modify,http});
+                    await editTask({context,data,room,read,persistence,modify,http});
                     return context.getInteractionResponder().successResponse();  
                 case MiscEnum.DELETE_TASK_ACTION_ID:
                     await deleteTask({context,data,room,read,persistence,modify,http});
