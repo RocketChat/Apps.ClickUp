@@ -52,11 +52,11 @@ export async function getTasks({
 
     const response = await http.get(`https://api.clickup.com/api/v2/list/${list_id}/task?archived=${archived}&subtasks=${subtasks}`,{ headers });
     if(response.statusCode==200) {
+        const builder = await modify.getCreator().startMessage().setRoom(room);
+        const block = modify.getCreator().getBlockBuilder();
         response.data.tasks.forEach(async (task) => {
             if (limit == 0) return;
             if (limit--) {
-                    const builder = await modify.getCreator().startMessage().setRoom(room);
-                    const block = modify.getCreator().getBlockBuilder();
                     block.addSectionBlock({
                         text: block.newPlainTextObject(`${task.name}`),
                     });
@@ -90,11 +90,12 @@ export async function getTasks({
                         ],
                     });
                     builder.setBlocks(block);
-                await modify
-                .getNotifier()
-                .notifyUser(user, builder.getMessage());;
+                
             }
         });
+        await modify
+                .getNotifier()
+                .notifyUser(user, builder.getMessage());;
     }
     else {
         const textSender = await modify
