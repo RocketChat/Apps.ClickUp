@@ -18,6 +18,7 @@ import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { getAccessTokenForUser } from "../storage/users";
 import { ModalsEnum } from "../enums/Modals";
 import { MiscEnum } from "../enums/Misc";
+import { HttpStatusCode } from '@rocket.chat/apps-engine/definition/accessors';
 
 export async function deleteTask({
     context,
@@ -44,7 +45,7 @@ export async function deleteTask({
     };
 
     const response = await http.del(`https://api.clickup.com/api/v2/task/${task_id}/`,{ headers });
-    if(response.statusCode==204) {
+    if(response.statusCode==HttpStatusCode.NO_CONTENT) {
         const textSender = await modify
         .getCreator()
         .startMessage()
