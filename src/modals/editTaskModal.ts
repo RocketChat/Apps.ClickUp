@@ -6,36 +6,32 @@ import { AppEnum } from '../enums/App';
 import { SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashcommands';
 import { UIKitBlockInteractionContext, UIKitInteractionContext, BlockElementType } from '@rocket.chat/apps-engine/definition/uikit';
 
-export async function createTaskModal({ modify, read, persistence, http, slashcommandcontext, uikitcontext }: { modify: IModify, read: IRead, persistence: IPersistence, http: IHttp ,slashcommandcontext?: SlashCommandContext, uikitcontext?: UIKitInteractionContext }): Promise<IUIKitModalViewParam> {
-    const viewId = ModalsEnum.CREATE_TASK;
-
+export async function editTaskModal({ modify, read, persistence, http, slashcommandcontext, uikitcontext, data }: { modify: IModify, read: IRead, persistence: IPersistence, http: IHttp ,slashcommandcontext?: SlashCommandContext, uikitcontext?: UIKitInteractionContext, data: any }): Promise<IUIKitModalViewParam> {
+    const viewId = ModalsEnum.EDIT_TASK;
     const block = modify.getCreator().getBlockBuilder();
+    let assignees = data.assignees.map(assignee => assignee['username']);
+    let dueDate = new Date(data.due_date *1);
+    let dueDatevalue = dueDate.toISOString().split('T')[0];
+    let startDate = new Date(data.start_date *1);
+    let startDatevalue = startDate.toISOString().split('T')[0];
 
-    block.addInputBlock({
-        blockId: ModalsEnum.LIST_ID_BLOCK,
-        label: { text: ModalsEnum.LIST_ID_INPUT_LABEL, type: TextObjectType.PLAINTEXT },
-        element: block.newPlainTextInputElement({
-            actionId: ModalsEnum.LIST_ID_INPUT,
-            placeholder: { text: '', type: TextObjectType.PLAINTEXT },
-            initialValue: ModalsEnum.LIST_ID_INPUT_LABEL_DEFAULT,
-        })
-    });
     block.addInputBlock({
         blockId: ModalsEnum.TASK_NAME_BLOCK,
         label: { text: ModalsEnum.TASK_NAME_INPUT_LABEL, type: TextObjectType.PLAINTEXT },
         element: block.newPlainTextInputElement({
             actionId: ModalsEnum.TASK_NAME_INPUT,
             placeholder: { text: '', type: TextObjectType.PLAINTEXT },
-            initialValue: ModalsEnum.TASK_NAME_INPUT_LABEL_DEFAULT,
+            initialValue: data.name as string || ModalsEnum.TASK_NAME_INPUT_LABEL_DEFAULT,
         })
     });
+
     block.addInputBlock({
         blockId: ModalsEnum.TASK_DESCRIPTION_BLOCK,
         label: { text: ModalsEnum.TASK_DESCRIPTION_INPUT_LABEL, type: TextObjectType.PLAINTEXT },
         element: block.newPlainTextInputElement({
             actionId: ModalsEnum.TASK_DESCRIPTION_INPUT,
             placeholder: { text: '', type: TextObjectType.PLAINTEXT },
-            initialValue: ModalsEnum.TASK_DESCRIPTION_INPUT_LABEL_DEFAULT,
+            initialValue: data.description as string || ModalsEnum.TASK_DESCRIPTION_INPUT_LABEL_DEFAULT,
             multiline : true,
         })
     });
@@ -47,6 +43,7 @@ export async function createTaskModal({ modify, read, persistence, http, slashco
             placeholder: { text: '', type: TextObjectType.PLAINTEXT },
             type: 'datepicker' as BlockElementType,
             actionId: ModalsEnum.TASK_START_DATE_INPUT,
+            initialValue: startDatevalue
         },
     });
 
@@ -57,6 +54,7 @@ export async function createTaskModal({ modify, read, persistence, http, slashco
             placeholder: { text: '', type: TextObjectType.PLAINTEXT },
             type: 'datepicker' as BlockElementType,
             actionId: ModalsEnum.TASK_DUE_DATE_INPUT,
+            initialValue: dueDatevalue
         },
     });
     block.addInputBlock({
@@ -65,30 +63,15 @@ export async function createTaskModal({ modify, read, persistence, http, slashco
         element: block.newPlainTextInputElement({
             actionId: ModalsEnum.TASK_ASSIGNEES_INPUT,
             placeholder: { text: '', type: TextObjectType.PLAINTEXT },
-            initialValue: ModalsEnum.TASK_ASSIGNEES_INPUT_LABEL_DEFAULT,
+            initialValue: assignees.toString() as string || ModalsEnum.TASK_ASSIGNEES_INPUT_LABEL_DEFAULT,
         })
     });
-    // To be added when Rocket.Chat 5.0 releases when dispatchment of actions from input elements will be allowed.
-    // block.addActionsBlock({
-    //     elements: [
-    //         block.newButtonElement({
-    //             actionId: ModalsEnum.CREATE_TASK,
-    //             text: { text: ModalsEnum.CREATE_TASK_LABEL, type: TextObjectType.PLAINTEXT },
-    //             value: room?.id
-    //         }),
-    //         block.newButtonElement({
-    //             actionId: ModalsEnum.CREATE_TASK_WITH_ROOM,
-    //             text: { text: ModalsEnum.CREATE_TASK_WITH_ROOM_LABEL, type: TextObjectType.PLAINTEXT },
-    //             value: room?.id
-    //         }),
-    //     ]
-    // });
 
     return {
         id: viewId,
         title: {
             type: TextObjectType.PLAINTEXT,
-            text: ModalsEnum.CREATE_TASK_MODAL_NAME,
+            text: ModalsEnum.EDIT_TASK_MODAL_NAME + data.id,
         },
         close: block.newButtonElement({
             text: {
@@ -97,7 +80,7 @@ export async function createTaskModal({ modify, read, persistence, http, slashco
             },
         }),
         submit: block.newButtonElement({
-            text: block.newPlainTextObject(ModalsEnum.CREATE_TASK_SUBMIT_BUTTON_LABEL),
+            text: block.newPlainTextObject(ModalsEnum.EDIT_TASK_SUBMIT_BUTTON_LABEL),
         }),
         blocks: block.getBlocks(),
     };

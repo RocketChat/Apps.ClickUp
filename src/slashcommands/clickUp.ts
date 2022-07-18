@@ -15,7 +15,7 @@ import { Subcommands } from '../enums/Subcommands';
 import { sendNotification } from '../lib/message';
 import { authorize } from './subcommands/authorize';
 import {createTask} from './subcommands/createTask';
-import { createTaskModal } from "../modals/createTaskModal";
+import {getTasks} from './subcommands/getTasks';
 
 export class ClickUp implements ISlashCommand {
     public command = 'clickup-app';
@@ -39,6 +39,9 @@ export class ClickUp implements ISlashCommand {
             case Subcommands.CreateTask:
                 await createTask(this.app, read, modify, context, persistence, http);
                 break;
+            case Subcommands.GetTasks:
+                await getTasks(this.app, read, modify, context, persistence, http);
+                break;
             default:
                 break;
         }
@@ -51,9 +54,11 @@ export class ClickUp implements ISlashCommand {
 
     private async displayAppHelpMessage(read: IRead, modify: IModify, user: IUser, room: IRoom): Promise<void> {
         const text = `ClickUp App provides you the following slash commands, /clickup-app:
-*help:* shows this list;
-*auth:* starts the process to authorize ClickUp Account;
-        `;
+
+    1) *help:* shows this list;
+    2) *auth:* starts the process to authorize your ClickUp Account;
+    3) *create* lets you create a new task.
+    4) *get* lets you retreive your tasks.    `;
 
         return sendNotification(read, modify, user, room, text);
     }
