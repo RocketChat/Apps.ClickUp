@@ -18,6 +18,7 @@ import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { getAccessTokenForUser } from "../storage/users";
 import { ModalsEnum } from "../enums/Modals";
 import { MiscEnum } from "../enums/Misc";
+import { HttpStatusCode } from '@rocket.chat/apps-engine/definition/accessors';
 
 export async function shareTask({
     context,
@@ -45,7 +46,7 @@ export async function shareTask({
 
     const response = await http.get(`https://api.clickup.com/api/v2/task/${task_id}/`,{ headers });
     
-    if(response.statusCode==200) {
+    if(response.statusCode==HttpStatusCode.OK) {
         const textSender = await modify
         .getCreator()
         .startMessage()

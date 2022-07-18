@@ -9,10 +9,10 @@ import { UIKitBlockInteractionContext, UIKitInteractionContext, BlockElementType
 export async function editTaskModal({ modify, read, persistence, http, slashcommandcontext, uikitcontext, data }: { modify: IModify, read: IRead, persistence: IPersistence, http: IHttp ,slashcommandcontext?: SlashCommandContext, uikitcontext?: UIKitInteractionContext, data: any }): Promise<IUIKitModalViewParam> {
     const viewId = ModalsEnum.EDIT_TASK;
     const block = modify.getCreator().getBlockBuilder();
-    var assignees = data.assignees.map(assignee => assignee['username']);
-    var dueDate = new Date(data.due_date *1);
+    let assignees = data.assignees.map(assignee => assignee['username']);
+    let dueDate = new Date(data.due_date *1);
     let dueDatevalue = dueDate.toISOString().split('T')[0];
-    var startDate = new Date(data.start_date *1);
+    let startDate = new Date(data.start_date *1);
     let startDatevalue = startDate.toISOString().split('T')[0];
 
     block.addInputBlock({

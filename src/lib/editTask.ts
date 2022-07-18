@@ -20,6 +20,7 @@ import { ModalsEnum } from "../enums/Modals";
 import { MiscEnum } from "../enums/Misc";
 import { getUIData } from "./persistence";
 import { editTaskModal } from "../modals/editTaskModal";
+import { HttpStatusCode } from '@rocket.chat/apps-engine/definition/accessors';
 
 export async function editTask({
     context,
@@ -47,9 +48,8 @@ export async function editTask({
     const headers = {
         Authorization: `${token?.token}`,
     };
-    console.log(token?.token);
     const response = await http.get(`https://api.clickup.com/api/v2/task/${task_id}/`,{ headers });
-    if(response.statusCode==200) {
+    if(response.statusCode==HttpStatusCode.OK) {
         if(triggerId){
         const modal = await editTaskModal({modify,read,persistence,http,slashcommandcontext,data:response.data});
         await modify.getUiController().openModalView(modal,{triggerId},user);

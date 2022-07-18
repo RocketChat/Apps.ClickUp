@@ -17,6 +17,7 @@ import { ICreateTaskState } from "../facade/IClickUpService";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { getAccessTokenForUser } from "../storage/users";
 import { ModalsEnum } from "../enums/Modals";
+import { HttpStatusCode } from '@rocket.chat/apps-engine/definition/accessors';
 
 export async function postTask({
     context,
@@ -56,7 +57,7 @@ export async function postTask({
 
     const response = await http.post(`https://api.clickup.com/api/v2/list/${list_id}/task`,{ headers , data: body});
 
-    if(response.statusCode==200) {
+    if(response.statusCode==HttpStatusCode.OK) {
         const textSender = await modify
         .getCreator()
         .startMessage()

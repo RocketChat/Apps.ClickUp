@@ -18,6 +18,7 @@ import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { getAccessTokenForUser } from "../storage/users";
 import { ModalsEnum } from "../enums/Modals";
 import { MiscEnum } from "../enums/Misc";
+import { HttpStatusCode } from '@rocket.chat/apps-engine/definition/accessors';
 
 export async function getTasks({
     context,
@@ -43,7 +44,7 @@ export async function getTasks({
     const archived = state?.[ModalsEnum.ARCHIVED_BLOCK]?.[ModalsEnum.ARCHIVED_ACTION_ID] == "Yes"?"true":"false";
     const subtasks = state?.[ModalsEnum.SUBTASKS_BLOCK]?.[ModalsEnum.SUBTASKS_ACTION_ID] == "Yes"?"true":"false";
     const taskLimit = state?.[ModalsEnum.TASK_LIMIT_BLOCK]?.[ModalsEnum.TASK_LIMIT_INPUT];
-    var limit = taskLimit;
+    let limit = taskLimit;
     limit > 101 ? 100: limit = taskLimit;
 
     const headers = {
@@ -51,7 +52,7 @@ export async function getTasks({
     };
 
     const response = await http.get(`https://api.clickup.com/api/v2/list/${list_id}/task?archived=${archived}&subtasks=${subtasks}`,{ headers });
-    if(response.statusCode==200) {
+    if(response.statusCode==HttpStatusCode.OK) {
         const builder = await modify.getCreator().startMessage().setRoom(room);
         const block = modify.getCreator().getBlockBuilder();
         response.data.tasks.forEach(async (task) => {
