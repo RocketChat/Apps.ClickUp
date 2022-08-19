@@ -14,13 +14,16 @@ import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { isUserHighHierarchy, sendDirectMessage } from './src/lib/message';
 import { IAuthData, IOAuth2Client, IOAuth2ClientOptions } from '@rocket.chat/apps-engine/definition/oauth2/IOAuth2';
 import { createOAuth2Client } from '@rocket.chat/apps-engine/definition/oauth2/OAuth2';
-import { create as registerAuthorizedUser } from './src/storage/users';
+import { connect_user_to_clickup_uid } from './src/storage/users';
 import { IMessageButonActions } from './IClickUpApp';
 import { createSectionBlock } from './src/lib/blocks';
 import { ClickUp as ClickUpCommand } from './src/slashcommands/clickUp';
 import { IUIKitInteractionHandler, IUIKitResponse, UIKitBlockInteractionContext, UIKitViewCloseInteractionContext, UIKitViewSubmitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
 import { ExecuteBlockActionHandler } from './src/handlers/ExecuteBlockActionHandler';
 import { ExecuteViewSubmitHandler } from './src/handlers/ExecuteViewSubmitHandler';
+import { HttpStatusCode } from '@rocket.chat/apps-engine/definition/accessors';
+
+
 export class ClickUpApp extends App {
 
     public botUsername: string;
@@ -50,7 +53,15 @@ export class ClickUpApp extends App {
     ) {
           
         if (token) {
-            await registerAuthorizedUser(read, persistence, user);
+            const headers = {
+                Authorization: `${token?.token}`,
+            };
+        
+            const userData = await http.get(`https://api.clickup.com/api/v2/user`,{ headers });
+            if(userData.statusCode==HttpStatusCode.OK) {
+                await connect_user_to_clickup_uid(read, persistence, userData.data.user.id, user.id);
+            }
+            
         }  
           
         const text =

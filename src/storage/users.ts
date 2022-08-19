@@ -1,9 +1,33 @@
-import { IPersistence, IRead } from "@rocket.chat/apps-engine/definition/accessors";
+import { IPersistence, IPersistenceRead, IRead } from "@rocket.chat/apps-engine/definition/accessors";
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from "@rocket.chat/apps-engine/definition/metadata";
 import { IAuthData, IOAuth2ClientOptions } from "@rocket.chat/apps-engine/definition/oauth2/IOAuth2";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
 
 const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, 'users');
+
+export  async function connect_user_to_clickup_uid(read: IRead, persistence: IPersistence,uid: string, user: string): Promise<void> {
+    const user_association = new RocketChatAssociationRecord(RocketChatAssociationModel.USER, user);
+    const cuid = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, 'clickup_uid');
+    await persistence.updateByAssociations([user_association, cuid], { uid }, true);
+
+}
+export async function get_clickup_uid(read: IRead, user: string): Promise<string | undefined> {
+    const rcuid = await read.getUserReader().getByUsername(user)
+    const associations = [
+        new RocketChatAssociationRecord(
+            RocketChatAssociationModel.USER,
+            rcuid.id,
+        ),
+        new RocketChatAssociationRecord(
+            RocketChatAssociationModel.MISC,
+            `clickup_uid`,
+        ),
+    ];
+    const [ result ] = await read.getPersistenceReader().readByAssociations(associations);
+
+    return (result as any)?.uid;
+
+}
 
 export async function create(read: IRead, persistence: IPersistence, user: IUser): Promise<void> {
     const users = await getAllUsers(read);
