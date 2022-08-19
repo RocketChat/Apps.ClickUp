@@ -1,4 +1,4 @@
-import { IHttp, IModify, IPersistence, IPersistenceRead, IRead } from '@rocket.chat/apps-engine/definition/accessors';
+import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
 import { UIKitViewSubmitInteractionContext , UIKitInteractionContext} from '@rocket.chat/apps-engine/definition/uikit';
 import { ModalsEnum } from '../enums/Modals';
