@@ -104,7 +104,7 @@ export async function postTask({
                 await sendDirectMessage(read, modify, rcuser, text, persistence);
         }
     if(roomneeded==="true"){     
-            const roombuilder = modify.getCreator().startRoom().setCreator(user).setType(RoomType.CHANNEL).setDisplayName(`Task- ${taskName}`).setSlugifiedName(`${taskName}`.replace(/[^a-zA-Z0-9 ]/g, '').replace(' ', '_'));
+            const roombuilder = modify.getCreator().startRoom().setCreator(user).setType(RoomType.PRIVATE_GROUP).setDisplayName(`Task- ${taskName}`).setSlugifiedName(`${taskName}`.replace(/[^a-zA-Z0-9 ]/g, '').replace(' ', '_'));
             roombuilder.setMembersToBeAddedByUsernames(rcassigneeslist);
             await modify.getCreator().finish(roombuilder);
         }
