@@ -16,7 +16,7 @@ export class ExecuteViewSubmitHandler {
 		private readonly read: IRead,
 		private readonly http: IHttp,
 		private readonly modify: IModify,
-		private readonly persistence: IPersistence
+		private readonly persistence: IPersistence,
         
 	) {}
 

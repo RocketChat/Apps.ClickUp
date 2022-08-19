@@ -59,6 +59,7 @@ export async function createTaskModal({ modify, read, persistence, http, slashco
             actionId: ModalsEnum.TASK_DUE_DATE_INPUT,
         },
     });
+    
     block.addInputBlock({
         blockId: ModalsEnum.TASK_ASSIGNEES_BLOCK,
         label: { text: ModalsEnum.TASK_ASSIGNEES_INPUT_LABEL, type: TextObjectType.PLAINTEXT },
@@ -68,21 +69,19 @@ export async function createTaskModal({ modify, read, persistence, http, slashco
             initialValue: ModalsEnum.TASK_ASSIGNEES_INPUT_LABEL_DEFAULT,
         })
     });
-    // To be added when Rocket.Chat 5.0 releases when dispatchment of actions from input elements will be allowed.
-    // block.addActionsBlock({
-    //     elements: [
-    //         block.newButtonElement({
-    //             actionId: ModalsEnum.CREATE_TASK,
-    //             text: { text: ModalsEnum.CREATE_TASK_LABEL, type: TextObjectType.PLAINTEXT },
-    //             value: room?.id
-    //         }),
-    //         block.newButtonElement({
-    //             actionId: ModalsEnum.CREATE_TASK_WITH_ROOM,
-    //             text: { text: ModalsEnum.CREATE_TASK_WITH_ROOM_LABEL, type: TextObjectType.PLAINTEXT },
-    //             value: room?.id
-    //         }),
-    //     ]
-    // });
+
+
+    block.addActionsBlock({
+        blockId: ModalsEnum.ASSIGNEE_ROOM_BLOCK,
+        elements: [
+            block.newStaticSelectElement({
+                actionId: ModalsEnum.ASSIGNEE_ROOM_ACTION_ID,
+                placeholder: block.newPlainTextObject(ModalsEnum.ASSIGNEE_ROOM_PLACEHOLDER),
+                options: [{ text: { type: TextObjectType.PLAINTEXT, text: 'Yes' }, value: 'Yes' }, { text: { type: TextObjectType.PLAINTEXT, text: 'No' }, value: 'No' }],
+                initialValue: 'No',
+            }),
+        ],
+    });
 
     return {
         id: viewId,
