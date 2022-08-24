@@ -43,16 +43,18 @@ export async function postTask({
     const token = await getAccessTokenForUser(read, user);
     const list_id = state?.[ModalsEnum.LIST_ID_BLOCK]?.[ModalsEnum.LIST_ID_INPUT];
     const taskName = state?.[ModalsEnum.TASK_NAME_BLOCK]?.[ModalsEnum.TASK_NAME_INPUT];
+    const taskPriority = state?.[ModalsEnum.TASK_PRIORITY_BLOCK]?.[ModalsEnum.TASK_PRIORITY_ACTION_ID];
     const taskDescription = state?.[ModalsEnum.TASK_DESCRIPTION_BLOCK]?.[ModalsEnum.TASK_DESCRIPTION_INPUT];
     const taskstartDate = Math.floor(new Date(state?.[ModalsEnum.TASK_START_DATE_BLOCK]?.[ModalsEnum.TASK_START_DATE_INPUT]).getTime()*1);
     const taskdueDate = Math.floor(new Date(state?.[ModalsEnum.TASK_DUE_DATE_BLOCK]?.[ModalsEnum.TASK_DUE_DATE_INPUT]).getTime()*1);
     const roomneeded = state?.[ModalsEnum.ASSIGNEE_ROOM_BLOCK]?.[ModalsEnum.ASSIGNEE_ROOM_ACTION_ID] == "Yes"?"true":"false";
     const rcassignees = state?.[ModalsEnum.TASK_ASSIGNEES_BLOCK]?.[ModalsEnum.TASK_ASSIGNEES_INPUT];
-    const rcassigneeslist = `${rcassignees}`.split(",");
     const cuassignees = [] as string[];
     const authorized = [] as string[];
     const unauthorized = [] as string[];
-
+ 
+    if(rcassignees!==undefined) {
+    const rcassigneeslist = `${rcassignees}`.split(",");
     for (let rcassignee of rcassigneeslist) {
         let cuassignee = await get_clickup_uid(read, rcassignee);
         if(cuassignee!==undefined) {
@@ -62,7 +64,7 @@ export async function postTask({
             unauthorized.push(rcassignee);
         }
         }
-
+    }
         const headers = {
         Authorization: `${token?.token}`,
     };
@@ -72,8 +74,9 @@ export async function postTask({
         'due_date':`${taskdueDate}`,
         'start_date': `${taskstartDate}`,
         'assignees' : cuassignees,
+        'priority': `${taskPriority}`,
     }
-
+ 
     const response = await http.post(`https://api.clickup.com/api/v2/list/${list_id}/task`,{ headers , data: body});
 
     if(response.statusCode==HttpStatusCode.OK) {
@@ -85,7 +88,8 @@ export async function postTask({
             textSender.setRoom(room);
         }
     await modify.getCreator().finish(textSender);
-
+    if(rcassignees!==undefined) {
+        const rcassigneeslist = `${rcassignees}`.split(",");
     for (let pendingassignee of unauthorized) {
     const text =
             `Hello, ${pendingassignee}!\n` +
@@ -103,12 +107,14 @@ export async function postTask({
                 const rcuser = await read.getUserReader().getByUsername(addedassignee)
                 await sendDirectMessage(read, modify, rcuser, text, persistence);
         }
+    
     if(roomneeded==="true"){     
             const roombuilder = modify.getCreator().startRoom().setCreator(user).setType(RoomType.PRIVATE_GROUP).setDisplayName(`Task- ${taskName}`).setSlugifiedName(`${taskName}`.replace(/[^a-zA-Z0-9 ]/g, '').replace(' ', '_'));
             roombuilder.setMembersToBeAddedByUsernames(rcassigneeslist);
             await modify.getCreator().finish(roombuilder);
         }
     }
+}
     else {
         const textSender = await modify
         .getCreator()

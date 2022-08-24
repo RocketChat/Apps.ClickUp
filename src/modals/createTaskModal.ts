@@ -16,8 +16,7 @@ export async function createTaskModal({ modify, read, persistence, http, slashco
         label: { text: ModalsEnum.LIST_ID_INPUT_LABEL, type: TextObjectType.PLAINTEXT },
         element: block.newPlainTextInputElement({
             actionId: ModalsEnum.LIST_ID_INPUT,
-            placeholder: { text: '', type: TextObjectType.PLAINTEXT },
-            initialValue: ModalsEnum.LIST_ID_INPUT_LABEL_DEFAULT,
+            placeholder: { text: ModalsEnum.LIST_ID_INPUT_LABEL_DEFAULT, type: TextObjectType.PLAINTEXT },
         })
     });
     block.addInputBlock({
@@ -25,17 +24,29 @@ export async function createTaskModal({ modify, read, persistence, http, slashco
         label: { text: ModalsEnum.TASK_NAME_INPUT_LABEL, type: TextObjectType.PLAINTEXT },
         element: block.newPlainTextInputElement({
             actionId: ModalsEnum.TASK_NAME_INPUT,
-            placeholder: { text: '', type: TextObjectType.PLAINTEXT },
-            initialValue: ModalsEnum.TASK_NAME_INPUT_LABEL_DEFAULT,
+            placeholder: { text: ModalsEnum.TASK_NAME_INPUT_LABEL_DEFAULT, type: TextObjectType.PLAINTEXT },
         })
     });
+
+    block.addActionsBlock({
+        blockId: ModalsEnum.TASK_PRIORITY_BLOCK,
+        elements: [
+            block.newStaticSelectElement({
+                actionId: ModalsEnum.TASK_PRIORITY_ACTION_ID,
+                placeholder: block.newPlainTextObject(ModalsEnum.TASK_PRIORITY_PLACEHOLDER),
+                options: [{ text: { type: TextObjectType.PLAINTEXT, text: 'Urgent' }, value: '1' }, { text: { type: TextObjectType.PLAINTEXT, text: 'High' }, value: '2' }, { text: { type: TextObjectType.PLAINTEXT, text: 'Normal' }, value: '3' }, { text: { type: TextObjectType.PLAINTEXT, text: 'Low' }, value: '4' }],
+                initialValue: 'Normal',
+            }),
+        ],
+    });
+
+
     block.addInputBlock({
         blockId: ModalsEnum.TASK_DESCRIPTION_BLOCK,
         label: { text: ModalsEnum.TASK_DESCRIPTION_INPUT_LABEL, type: TextObjectType.PLAINTEXT },
         element: block.newPlainTextInputElement({
             actionId: ModalsEnum.TASK_DESCRIPTION_INPUT,
-            placeholder: { text: '', type: TextObjectType.PLAINTEXT },
-            initialValue: ModalsEnum.TASK_DESCRIPTION_INPUT_LABEL_DEFAULT,
+            placeholder: { text: ModalsEnum.TASK_DESCRIPTION_INPUT_LABEL_DEFAULT, type: TextObjectType.PLAINTEXT },
             multiline : true,
         })
     });
@@ -65,8 +76,7 @@ export async function createTaskModal({ modify, read, persistence, http, slashco
         label: { text: ModalsEnum.TASK_ASSIGNEES_INPUT_LABEL, type: TextObjectType.PLAINTEXT },
         element: block.newPlainTextInputElement({
             actionId: ModalsEnum.TASK_ASSIGNEES_INPUT,
-            placeholder: { text: '', type: TextObjectType.PLAINTEXT },
-            initialValue: ModalsEnum.TASK_ASSIGNEES_INPUT_LABEL_DEFAULT,
+            placeholder: { text: ModalsEnum.TASK_ASSIGNEES_INPUT_LABEL_DEFAULT, type: TextObjectType.PLAINTEXT },
         })
     });
 

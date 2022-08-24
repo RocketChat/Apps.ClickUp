@@ -19,6 +19,14 @@ import { getUIData } from '../lib/persistence';
 import { shareTask } from "../lib/shareTask";
 import { deleteTask } from "../lib/deleteTask";
 import { editTask } from "../lib/editTask";
+import { saveWorkspace } from "../lib/saveWorkspace";
+import { getSpaces } from "../lib/getSpaces";
+import { getFolders } from "../lib/getFolders";
+import { getLists } from "../lib/getLists";
+import { getTasksModal } from "../modals/getTasksModal";
+import { deleteSpace } from "../lib/deleteSpace";
+import { deleteFolder } from "../lib/deleteFolder";
+import { deleteList } from "../lib/deleteList";
 
 export class ExecuteBlockActionHandler {
     constructor(
@@ -56,7 +64,33 @@ export class ExecuteBlockActionHandler {
                     return context.getInteractionResponder().successResponse();  
                 case MiscEnum.DELETE_TASK_ACTION_ID:
                     await deleteTask({context,data,room,read,persistence,modify,http});
+                    return context.getInteractionResponder().successResponse();   
+                case MiscEnum.SAVE_WORKSPACE_ACTION_ID:
+                    await saveWorkspace({context,data,room,read,persistence,modify,http});
                     return context.getInteractionResponder().successResponse();    
+                case MiscEnum.GET_SPACES_ACTION_ID:
+                    await getSpaces({context,data,room,read,persistence,modify,http});
+                    return context.getInteractionResponder().successResponse(); 
+                case MiscEnum.DELETE_SPACE_ACTION_ID:
+                        await deleteSpace({context,data,room,read,persistence,modify,http});
+                        return context.getInteractionResponder().successResponse();  
+                case MiscEnum.GET_FOLDERS_ACTION_ID:
+                    await getFolders({context,data,room,read,persistence,modify,http});
+                    return context.getInteractionResponder().successResponse();      
+                case MiscEnum.DELETE_FOLDER_ACTION_ID:
+                        await deleteFolder({context,data,room,read,persistence,modify,http});
+                        return context.getInteractionResponder().successResponse();  
+                case MiscEnum.GET_LISTS_ACTION_ID:
+                    await getLists({context,data,room,read,persistence,modify,http});
+                    return context.getInteractionResponder().successResponse(); 
+                case MiscEnum.DELETE_LIST_ACTION_ID:
+                        await deleteList({context,data,room,read,persistence,modify,http});
+                        return context.getInteractionResponder().successResponse();   
+                case MiscEnum.GET_TASKS_ACTION_ID:
+                    const modal = await getTasksModal({modify,read,persistence,http,data:context.getInteractionData().value});
+                    const triggerId= context.getInteractionData().triggerId;
+                    await modify.getUiController().openModalView(modal,{triggerId},context.getInteractionData().user);
+                    return context.getInteractionResponder().successResponse();  
                 default:
                     break;
             }

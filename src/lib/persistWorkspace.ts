@@ -15,11 +15,12 @@ import {
 import { IUIKitViewSubmitIncomingInteraction } from "@rocket.chat/apps-engine/definition/uikit/UIKitIncomingInteractionTypes";
 import { ICreateTaskState } from "../facade/IClickUpService";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
-import { getAccessTokenForUser } from "../storage/users";
+import { connect_user_to_clickup_uid, getAccessTokenForUser } from "../storage/users";
 import { ModalsEnum } from "../enums/Modals";
 import { HttpStatusCode } from '@rocket.chat/apps-engine/definition/accessors';
+import { persist_workspace } from "./persistence";
 
-export async function updateTask({
+export async function persistWorkspace({
     context,
     data,
     room,
@@ -37,42 +38,42 @@ export async function updateTask({
     http: IHttp;
 }) {
     const state = data.view.state;
+    console.log(state)
     const user: IUser = context.getInteractionData().user;
-    const token = await getAccessTokenForUser(read, user);
-    const task_id = data.view.title.text.split("#")[1];
-    const taskName = state?.[ModalsEnum.TASK_NAME_BLOCK]?.[ModalsEnum.TASK_NAME_INPUT];
-    const taskDescription = state?.[ModalsEnum.TASK_DESCRIPTION_BLOCK]?.[ModalsEnum.TASK_DESCRIPTION_INPUT];
-    const taskstartDate = Math.floor(new Date(state?.[ModalsEnum.TASK_START_DATE_BLOCK]?.[ModalsEnum.TASK_START_DATE_INPUT]).getTime()*1);
-    const taskdueDate = Math.floor(new Date(state?.[ModalsEnum.TASK_DUE_DATE_BLOCK]?.[ModalsEnum.TASK_DUE_DATE_INPUT]).getTime()*1);
-    const headers = {
-        Authorization: `${token?.token}`,
-    };
-    const body = {
-        'name': `${taskName}`,
-        'description': `${taskDescription}`,
-        'due_date':`${taskdueDate}`,
-        'start_date': `${taskstartDate}`,
+    const workspace_id = data.view.title.text.split("#")[2];
+    const workspaceName = data.view.title.text.split("#")[1];
+    const membercount = data.view.title.text.split("#")[3]; 
+    const teammemberlist = [] as string[];
+    console.log(membercount)
+    for(let index=0;index<+membercount;index++){
+        const inputbox =  state?.[ModalsEnum.MEMBER_USERNAME_BLOCK+`#${index}`]?.[ModalsEnum.MEMBER_USERNAME_INPUT+`#${index}`];
+        const rcusername = inputbox.split(":")[1];
+        const clickup_uid = inputbox.split(":")[0];
+        teammemberlist.push(`${rcusername}:${clickup_uid}`)
+        const rcuser = await read.getUserReader().getByUsername(rcusername)
+        await connect_user_to_clickup_uid(read, persistence, clickup_uid, rcuser.id);
     }
-    const response = await http.put(`https://api.clickup.com/api/v2/task/${task_id}/`,{ headers , data: body});
+    try {
+        await persist_workspace(read,persistence,user.id,`${workspace_id}:${workspaceName}`,teammemberlist)
     
-    if(response.statusCode==HttpStatusCode.OK) {
         const textSender = await modify
         .getCreator()
         .startMessage()
-        .setText(`✅️ Task updated successfully! \n You may access it at [${taskName}](${response.data.url})`);
+        .setText(`✅️ Workspace and members data saved successfully!`);
+        if (room) {
+            textSender.setRoom(room);
+        }
+    await modify.getCreator().finish(textSender);
+    } catch (error) {
+        const textSender = await modify
+        .getCreator()
+        .startMessage()
+        .setText(`❗️ Unable to save! \n Error ${error}`);
         if (room) {
             textSender.setRoom(room);
         }
     await modify.getCreator().finish(textSender);
     }
-    else {
-        const textSender = await modify
-        .getCreator()
-        .startMessage()
-        .setText(`❗️ Unable to update task! \n Error ${response.data.err}`);
-        if (room) {
-            textSender.setRoom(room);
-        }
-    await modify.getCreator().finish(textSender);
-    }
+   
+    
 }
