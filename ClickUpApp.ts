@@ -18,7 +18,7 @@ import { connect_user_to_clickup_uid } from './src/storage/users';
 import { IMessageButonActions } from './IClickUpApp';
 import { createSectionBlock } from './src/lib/blocks';
 import { ClickUp as ClickUpCommand } from './src/slashcommands/clickUp';
-import { IUIKitInteractionHandler, IUIKitResponse, UIKitBlockInteractionContext, UIKitViewCloseInteractionContext, UIKitViewSubmitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
+import { IUIKitResponse, UIKitBlockInteractionContext, UIKitViewSubmitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
 import { ExecuteBlockActionHandler } from './src/handlers/ExecuteBlockActionHandler';
 import { ExecuteViewSubmitHandler } from './src/handlers/ExecuteViewSubmitHandler';
 import { HttpStatusCode } from '@rocket.chat/apps-engine/definition/accessors';
@@ -65,19 +65,15 @@ export class ClickUpApp extends App {
         }  
           
         const text =
-        `The authentication process has succeed! :tada:\n` +
-        `Tomorrow you will start to receive Direct Messages with ` +
-        `your daily task summary and will also be notified for ` +
-        `each task 10 minutes before it starts.\n` +
-        `If you want to change any settings, please click the button ` +
-        `below or type \`/clickup-app settings\` in the text box.`;
+        `The authentication process has succeeded! :tada:\n` +
+        `If you are a workspace admin, retrieve it using ` +
+        `\`/clickup-app get-workspaces\` slash command and ` +
+        `save it for managing its members and tasks.\n` +
+        `If you are just a member of a workspace, you will be notified` +
+        `once your admin assigns you a task.`;
 
-        const button = {
-            actionId: IMessageButonActions.GoToSettings,
-            text: 'Settings',
-        };
 
-        const blocks = await createSectionBlock(modify, text, button);
+        const blocks = await createSectionBlock(modify, text);
 
         await sendDirectMessage(read, modify, user, text, persistence, blocks);
     }
@@ -99,7 +95,7 @@ export class ClickUpApp extends App {
     ): Promise<void> {
         const user = context.user;
 
-        const quickReminder = 'Quick reminder: Let your workspaces users know about the ClickUp App,\
+        const quickReminder = 'Quick reminder: Let your workspace users know about the ClickUp App,\
                             so everyone will be able to manage their tasks/workspaces as well.\n';
 
         const text =
