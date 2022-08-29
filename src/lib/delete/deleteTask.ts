@@ -1,26 +1,17 @@
 import {
     IHttp,
-    IMessageBuilder,
     IModify,
-    IModifyCreator,
     IPersistence,
     IRead,
 } from "@rocket.chat/apps-engine/definition/accessors";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
-import { IUIKitResponse, TextObjectType, UIKitViewSubmitInteractionContext , ButtonStyle, UIKitBlockInteractionContext} from '@rocket.chat/apps-engine/definition/uikit';
-import {
-    ISlashCommand,
-    SlashCommandContext,
-} from "@rocket.chat/apps-engine/definition/slashcommands";
-import { IUIKitBaseIncomingInteraction, IUIKitViewSubmitIncomingInteraction } from "@rocket.chat/apps-engine/definition/uikit/UIKitIncomingInteractionTypes";
-import { ICreateTaskState } from "../facade/IClickUpService";
+import { UIKitBlockInteractionContext} from '@rocket.chat/apps-engine/definition/uikit';
+import { IUIKitBaseIncomingInteraction } from "@rocket.chat/apps-engine/definition/uikit/UIKitIncomingInteractionTypes";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
-import { getAccessTokenForUser } from "../storage/users";
-import { ModalsEnum } from "../enums/Modals";
-import { MiscEnum } from "../enums/Misc";
+import { getAccessTokenForUser } from "../../storage/users";
 import { HttpStatusCode } from '@rocket.chat/apps-engine/definition/accessors';
 
-export async function shareTask({
+export async function deleteTask({
     context,
     data,
     room,
@@ -44,13 +35,12 @@ export async function shareTask({
         Authorization: `${token?.token}`,
     };
 
-    const response = await http.get(`https://api.clickup.com/api/v2/task/${task_id}/`,{ headers });
-    
-    if(response.statusCode==HttpStatusCode.OK) {
+    const response = await http.del(`https://api.clickup.com/api/v2/task/${task_id}/`,{ headers });
+    if(response.statusCode==HttpStatusCode.NO_CONTENT) {
         const textSender = await modify
         .getCreator()
         .startMessage()
-        .setText(`[${response.data.name}](${response.data.url})`+` | ${response.data.description}`.slice(0, 80) + `...`);
+        .setText(`✅️ Task deleted successfully!`);
         if (room) {
             textSender.setRoom(room);
         }
@@ -60,7 +50,7 @@ export async function shareTask({
         const textSender = await modify
         .getCreator()
         .startMessage()
-        .setText(`❗️ Unable to share task! \n Error ${response.data.err}`);
+        .setText(`❗️ Unable to delete task! \n Error ${response.data.err}`);
         if (room) {
             textSender.setRoom(room);
         }

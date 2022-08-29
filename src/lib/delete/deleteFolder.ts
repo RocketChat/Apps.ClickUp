@@ -1,26 +1,18 @@
 import {
     IHttp,
-    IMessageBuilder,
     IModify,
-    IModifyCreator,
     IPersistence,
     IRead,
 } from "@rocket.chat/apps-engine/definition/accessors";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
-import { IUIKitResponse, TextObjectType, UIKitViewSubmitInteractionContext , ButtonStyle, UIKitBlockInteractionContext} from '@rocket.chat/apps-engine/definition/uikit';
-import {
-    ISlashCommand,
-    SlashCommandContext,
-} from "@rocket.chat/apps-engine/definition/slashcommands";
-import { IUIKitBaseIncomingInteraction, IUIKitViewSubmitIncomingInteraction } from "@rocket.chat/apps-engine/definition/uikit/UIKitIncomingInteractionTypes";
-import { ICreateTaskState } from "../facade/IClickUpService";
+import {  UIKitBlockInteractionContext} from '@rocket.chat/apps-engine/definition/uikit';
+import { IUIKitBaseIncomingInteraction } from "@rocket.chat/apps-engine/definition/uikit/UIKitIncomingInteractionTypes";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
-import { getAccessTokenForUser } from "../storage/users";
-import { ModalsEnum } from "../enums/Modals";
-import { MiscEnum } from "../enums/Misc";
+import { getAccessTokenForUser } from "../../storage/users";
+
 import { HttpStatusCode } from '@rocket.chat/apps-engine/definition/accessors';
 
-export async function deleteTask({
+export async function deleteFolder({
     context,
     data,
     room,
@@ -39,17 +31,17 @@ export async function deleteTask({
 }) {
     const user: IUser = context.getInteractionData().user;
     const token = await getAccessTokenForUser(read, user);
-    const task_id = context.getInteractionData().value;
+    const folder_id = context.getInteractionData().value;
     const headers = {
         Authorization: `${token?.token}`,
     };
 
-    const response = await http.del(`https://api.clickup.com/api/v2/task/${task_id}/`,{ headers });
+    const response = await http.del(`https://api.clickup.com/api/v2/folder/${folder_id}/`,{ headers });
     if(response.statusCode==HttpStatusCode.NO_CONTENT) {
         const textSender = await modify
         .getCreator()
         .startMessage()
-        .setText(`✅️ Task deleted successfully!`);
+        .setText(`✅️ Folder deleted successfully!`);
         if (room) {
             textSender.setRoom(room);
         }
@@ -59,7 +51,7 @@ export async function deleteTask({
         const textSender = await modify
         .getCreator()
         .startMessage()
-        .setText(`❗️ Unable to delete task! \n Error ${response.data.err}`);
+        .setText(`❗️ Unable to delete folder! \n Error ${response.data.err}`);
         if (room) {
             textSender.setRoom(room);
         }

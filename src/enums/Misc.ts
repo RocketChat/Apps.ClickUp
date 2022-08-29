@@ -22,6 +22,8 @@ export enum MiscEnum {
     SHARE_TASK_ACTION_ID = 'share-task',
     DELETE_TASK_BUTTON = 'Delete',
     DELETE_TASK_ACTION_ID = 'delete-task',
+    SUBSCRIBE_TASK_BUTTON = 'Subscribe',
+    SUBSCRIBE_TASK_ACTION_ID = 'subscribe-task',
     DELETE_SPACE_BUTTON = 'Delete',
     DELETE_SPACE_ACTION_ID = 'delete-space',
     DELETE_FOLDER_BUTTON = 'Delete',
