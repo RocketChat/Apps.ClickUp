@@ -15,14 +15,14 @@ import { isUserHighHierarchy, sendDirectMessage } from './src/lib/message';
 import { IAuthData, IOAuth2Client, IOAuth2ClientOptions } from '@rocket.chat/apps-engine/definition/oauth2/IOAuth2';
 import { createOAuth2Client } from '@rocket.chat/apps-engine/definition/oauth2/OAuth2';
 import { connect_user_to_clickup_uid } from './src/storage/users';
-import { IMessageButonActions } from './IClickUpApp';
 import { createSectionBlock } from './src/lib/blocks';
 import { ClickUp as ClickUpCommand } from './src/slashcommands/clickUp';
 import { IUIKitResponse, UIKitBlockInteractionContext, UIKitViewSubmitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
 import { ExecuteBlockActionHandler } from './src/handlers/ExecuteBlockActionHandler';
 import { ExecuteViewSubmitHandler } from './src/handlers/ExecuteViewSubmitHandler';
 import { HttpStatusCode } from '@rocket.chat/apps-engine/definition/accessors';
-
+import { ApiSecurity, ApiVisibility } from '@rocket.chat/apps-engine/definition/api';
+import {clickupWebhooks} from './src/endpoints/incoming'
 
 export class ClickUpApp extends App {
 
@@ -121,7 +121,7 @@ export class ClickUpApp extends App {
 
     public async executeViewSubmitHandler(context: UIKitViewSubmitInteractionContext, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify) {
         const handler = new ExecuteViewSubmitHandler(this, read, http, modify, persistence);
-        return await handler.run(context, read, http, persistence, modify);
+        return await handler.run(this, context, read, http, persistence, modify);
 	}
 
     protected async extendConfiguration(
@@ -135,6 +135,11 @@ export class ClickUpApp extends App {
             this.getOauth2ClientInstance().setup(configuration),
             configuration.slashCommands.provideSlashCommand(new ClickUpCommand(this)),
         ]);
+        configuration.api.provideApi({
+            visibility: ApiVisibility.PUBLIC,
+            security: ApiSecurity.UNSECURE,
+            endpoints: [new clickupWebhooks(this)]
+        });
     }
 
 }

@@ -8,11 +8,11 @@ import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import {  UIKitBlockInteractionContext} from '@rocket.chat/apps-engine/definition/uikit';
 import { IUIKitBaseIncomingInteraction } from "@rocket.chat/apps-engine/definition/uikit/UIKitIncomingInteractionTypes";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
-import { getAccessTokenForUser } from "../storage/users";
+import { getAccessTokenForUser } from "../../storage/users";
 
 import { HttpStatusCode } from '@rocket.chat/apps-engine/definition/accessors';
 
-export async function deleteFolder({
+export async function deleteSpace({
     context,
     data,
     room,
@@ -31,17 +31,17 @@ export async function deleteFolder({
 }) {
     const user: IUser = context.getInteractionData().user;
     const token = await getAccessTokenForUser(read, user);
-    const folder_id = context.getInteractionData().value;
+    const space_id = context.getInteractionData().value;
     const headers = {
         Authorization: `${token?.token}`,
     };
 
-    const response = await http.del(`https://api.clickup.com/api/v2/folder/${folder_id}/`,{ headers });
+    const response = await http.del(`https://api.clickup.com/api/v2/space/${space_id}/`,{ headers });
     if(response.statusCode==HttpStatusCode.NO_CONTENT) {
         const textSender = await modify
         .getCreator()
         .startMessage()
-        .setText(`✅️ Folder deleted successfully!`);
+        .setText(`✅️ Space deleted successfully!`);
         if (room) {
             textSender.setRoom(room);
         }
@@ -51,7 +51,7 @@ export async function deleteFolder({
         const textSender = await modify
         .getCreator()
         .startMessage()
-        .setText(`❗️ Unable to delete folder! \n Error ${response.data.err}`);
+        .setText(`❗️ Unable to delete space! \n Error ${response.data.err}`);
         if (room) {
             textSender.setRoom(room);
         }

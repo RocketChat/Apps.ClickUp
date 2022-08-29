@@ -1,26 +1,18 @@
 import {
     IHttp,
-    IMessageBuilder,
     IModify,
-    IModifyCreator,
     IPersistence,
     IRead,
 } from "@rocket.chat/apps-engine/definition/accessors";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
-import { IUIKitResponse, TextObjectType, UIKitViewSubmitInteractionContext , ButtonStyle, UIKitBlockInteractionContext} from '@rocket.chat/apps-engine/definition/uikit';
-import {
-    ISlashCommand,
-    SlashCommandContext,
-} from "@rocket.chat/apps-engine/definition/slashcommands";
-import { IUIKitBaseIncomingInteraction, IUIKitViewSubmitIncomingInteraction } from "@rocket.chat/apps-engine/definition/uikit/UIKitIncomingInteractionTypes";
-import { ICreateTaskState } from "../facade/IClickUpService";
+import { ButtonStyle, UIKitBlockInteractionContext} from '@rocket.chat/apps-engine/definition/uikit';
+import { IUIKitBaseIncomingInteraction} from "@rocket.chat/apps-engine/definition/uikit/UIKitIncomingInteractionTypes";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
-import { getAccessTokenForUser } from "../storage/users";
-import { ModalsEnum } from "../enums/Modals";
-import { MiscEnum } from "../enums/Misc";
+import { getAccessTokenForUser } from "../../storage/users";
+import { MiscEnum } from "../../enums/Misc";
 import { HttpStatusCode } from '@rocket.chat/apps-engine/definition/accessors';
 
-export async function getLists({
+export async function getFolders({
     context,
     data,
     room,
@@ -39,38 +31,38 @@ export async function getLists({
 }) {
     const user: IUser = context.getInteractionData().user;
     const token = await getAccessTokenForUser(read, user);
-    const folder_id = context.getInteractionData().value;
+    const value = context.getInteractionData().value;
+    const space_id = value?.split(',')[1];
     const headers = {
         Authorization: `${token?.token}`,
     };
 
-    const response = await http.get(`https://api.clickup.com/api/v2/folder/${folder_id}/list?archived=false`,{ headers });
+    const response = await http.get(`https://api.clickup.com/api/v2/space/${space_id}/folder?archived=false`,{ headers });
     
     if(response.statusCode==HttpStatusCode.OK) {
-        let limit = response.data.lists.length;
-        
+        let limit = response.data.folders.length;
         const builder = await modify.getCreator().startMessage().setRoom(room);
         const block = modify.getCreator().getBlockBuilder();
-        response.data.lists.forEach(async (list) => {
+        response.data.folders.forEach(async (folder) => {
             if (limit == 0) return;
             if (limit--) {
                     block.addSectionBlock({
-                        text: block.newPlainTextObject(`${list.name}`),
+                        text: block.newPlainTextObject(`${folder.name}`),
                     });
-                    block.addContextBlock({ elements: [ block.newPlainTextObject(`ID: `+`${list.id}` +`${list.priority?` |Priority: `+list.priority.priority``:""}`)]});
+                    block.addContextBlock({ elements: [ block.newPlainTextObject(`ID: `+`${folder.id}`)]});
                     block.addActionsBlock({
-                        blockId: MiscEnum.LIST_ACTIONS_BLOCK,
+                        blockId: MiscEnum.FOLDER_ACTIONS_BLOCK,
                         elements: [
                             block.newButtonElement({
-                                actionId: MiscEnum.GET_TASKS_ACTION_ID,
-                                text: block.newPlainTextObject(MiscEnum.GET_TASKS_BUTTON),
-                                value: `${list.id}`,
+                                actionId: MiscEnum.GET_LISTS_ACTION_ID,
+                                text: block.newPlainTextObject(MiscEnum.GET_LISTS_BUTTON),
+                                value: `${value},${folder.id}`,
                                 style: ButtonStyle.PRIMARY,
                             }),
                             block.newButtonElement({
-                                actionId: MiscEnum.DELETE_LIST_ACTION_ID,
-                                text: block.newPlainTextObject(MiscEnum.DELETE_LIST_BUTTON),
-                                value: `${list.id}`,
+                                actionId: MiscEnum.DELETE_FOLDER_ACTION_ID,
+                                text: block.newPlainTextObject(MiscEnum.DELETE_FOLDER_BUTTON),
+                                value: `${folder.id}`,
                                 style: ButtonStyle.DANGER,
                             }),
                         ],
@@ -87,7 +79,7 @@ export async function getLists({
         const textSender = await modify
         .getCreator()
         .startMessage()
-        .setText(`❗️ Unable to retrieve lists! \n Error ${response.data.err}`);
+        .setText(`❗️ Unable to retrieve folders! \n Error ${response.data.err}`);
         if (room) {
             textSender.setRoom(room);
         }

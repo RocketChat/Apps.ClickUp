@@ -10,13 +10,16 @@ import { UIKitBlockInteractionContext, UIKitInteractionContext } from '@rocket.c
 export async function getTasksModal({ modify, read, persistence, http, slashcommandcontext, uikitcontext, data }: { modify: IModify, read: IRead, persistence: IPersistence, http: IHttp ,slashcommandcontext?: SlashCommandContext, uikitcontext?: UIKitInteractionContext, data?: string }): Promise<IUIKitModalViewParam> {
     const viewId = ModalsEnum.GET_TASKS;
     const block = modify.getCreator().getBlockBuilder();
+    let title;
+    data?title=`from Workspace #${data?.split(',')[0]}`:title='';
+
     block.addInputBlock({
         blockId: ModalsEnum.LIST_ID_BLOCK,
         label: { text: ModalsEnum.LIST_ID_INPUT_LABEL, type: TextObjectType.PLAINTEXT },
         element: block.newPlainTextInputElement({
             actionId: ModalsEnum.LIST_ID_INPUT,
-            placeholder: { text: '', type: TextObjectType.PLAINTEXT },
-            initialValue: data || ModalsEnum.LIST_ID_INPUT_LABEL_DEFAULT,
+            placeholder: { text: ModalsEnum.LIST_ID_INPUT_LABEL_DEFAULT, type: TextObjectType.PLAINTEXT },
+            initialValue: data?.split(',')[3] || '',
         })
     });
     block.addInputBlock({
@@ -24,18 +27,16 @@ export async function getTasksModal({ modify, read, persistence, http, slashcomm
         label: { text: ModalsEnum.TASK_LIMIT_INPUT_LABEL, type: TextObjectType.PLAINTEXT },
         element: block.newPlainTextInputElement({
             actionId: ModalsEnum.TASK_LIMIT_INPUT,
-            placeholder: { text: '', type: TextObjectType.PLAINTEXT },
-            initialValue: ModalsEnum.TASK_LIMIT_INPUT_LABEL_DEFAULT,
+            placeholder: { text: ModalsEnum.TASK_LIMIT_INPUT_LABEL_DEFAULT, type: TextObjectType.PLAINTEXT },
+            initialValue: `1`,
         })
     });
-
     block.addSectionBlock({
         text: {
             text: ModalsEnum.OPTIONAL_PARAMETERS_LABEL,
             type: TextObjectType.PLAINTEXT,
         },
     });
-
     block.addActionsBlock({
         blockId: ModalsEnum.ARCHIVED_BLOCK,
         elements: [
@@ -63,7 +64,7 @@ export async function getTasksModal({ modify, read, persistence, http, slashcomm
         id: viewId,
         title: {
             type: TextObjectType.PLAINTEXT,
-            text: ModalsEnum.GET_TASKS_MODAL_NAME,
+            text: ModalsEnum.GET_TASKS_MODAL_NAME + title,
         },
         close: block.newButtonElement({
             text: {

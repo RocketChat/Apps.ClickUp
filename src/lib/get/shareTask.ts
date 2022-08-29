@@ -5,14 +5,13 @@ import {
     IRead,
 } from "@rocket.chat/apps-engine/definition/accessors";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
-import {  UIKitBlockInteractionContext} from '@rocket.chat/apps-engine/definition/uikit';
+import { UIKitBlockInteractionContext} from '@rocket.chat/apps-engine/definition/uikit';
 import { IUIKitBaseIncomingInteraction } from "@rocket.chat/apps-engine/definition/uikit/UIKitIncomingInteractionTypes";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
-import { getAccessTokenForUser } from "../storage/users";
-
+import { getAccessTokenForUser } from "../../storage/users";
 import { HttpStatusCode } from '@rocket.chat/apps-engine/definition/accessors';
 
-export async function deleteList({
+export async function shareTask({
     context,
     data,
     room,
@@ -31,17 +30,18 @@ export async function deleteList({
 }) {
     const user: IUser = context.getInteractionData().user;
     const token = await getAccessTokenForUser(read, user);
-    const list_id = context.getInteractionData().value;
+    const task_id = context.getInteractionData().value;
     const headers = {
         Authorization: `${token?.token}`,
     };
 
-    const response = await http.del(`https://api.clickup.com/api/v2/list/${list_id}/`,{ headers });
-    if(response.statusCode==HttpStatusCode.NO_CONTENT) {
+    const response = await http.get(`https://api.clickup.com/api/v2/task/${task_id}/`,{ headers });
+    
+    if(response.statusCode==HttpStatusCode.OK) {
         const textSender = await modify
         .getCreator()
         .startMessage()
-        .setText(`✅️ List deleted successfully!`);
+        .setText(`[${response.data.name}](${response.data.url})`+` | ${response.data.description}`.slice(0, 80) + `...`);
         if (room) {
             textSender.setRoom(room);
         }
@@ -51,7 +51,7 @@ export async function deleteList({
         const textSender = await modify
         .getCreator()
         .startMessage()
-        .setText(`❗️ Unable to delete list! \n Error ${response.data.err}`);
+        .setText(`❗️ Unable to share task! \n Error ${response.data.err}`);
         if (room) {
             textSender.setRoom(room);
         }
