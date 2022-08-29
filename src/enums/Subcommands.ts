@@ -2,6 +2,8 @@ export enum Subcommands {
     Help = 'help',
     Auth = 'auth',
     CheckForUserTasks = 'tasks',
-    CreateTask = 'create',
-    GetTasks = 'get',
+    CreateTask = 'create-task',
+    GetTasks = 'get-tasks',
+    GetTeams = 'get-teams',
+    GetWorkspaces = 'get-workspaces'
 };

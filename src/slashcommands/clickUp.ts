@@ -16,6 +16,7 @@ import { sendNotification } from '../lib/message';
 import { authorize } from './subcommands/authorize';
 import {createTask} from './subcommands/createTask';
 import {getTasks} from './subcommands/getTasks';
+import { getWorkspaces } from './subcommands/getWorkspaces';
 
 export class ClickUp implements ISlashCommand {
     public command = 'clickup-app';
@@ -33,6 +34,9 @@ export class ClickUp implements ISlashCommand {
         }
 
         switch (command) {
+            case Subcommands.Help:
+                await this.displayAppHelpMessage(read, modify, context.getSender(), context.getRoom());
+                break;
             case Subcommands.Auth:
                 await authorize(this.app, read, modify, context.getSender(), persistence);
                 break;
@@ -42,7 +46,11 @@ export class ClickUp implements ISlashCommand {
             case Subcommands.GetTasks:
                 await getTasks(this.app, read, modify, context, persistence, http);
                 break;
+            case Subcommands.GetWorkspaces:
+                await getWorkspaces(this.app, read, modify, context, persistence, http);
+                break;
             default:
+                await this.displayAppHelpMessage(read, modify, context.getSender(), context.getRoom());
                 break;
         }
     }
@@ -57,8 +65,9 @@ export class ClickUp implements ISlashCommand {
 
     1) *help:* shows this list;
     2) *auth:* starts the process to authorize your ClickUp Account;
-    3) *create* lets you create a new task.
-    4) *get* lets you retreive your tasks.    `;
+    3) *get-workspaces* lets you retreive your workspaces from ClickUp.
+    4) *create-task* lets you create a new task.
+    4) *get-tasks* lets you retreive your tasks.    `;
 
         return sendNotification(read, modify, user, room, text);
     }

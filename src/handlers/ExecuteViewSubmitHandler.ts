@@ -9,6 +9,7 @@ import { SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashco
 import { getUIData } from '../lib/persistence';
 import { getTasks } from '../lib/getTasks';
 import { updateTask } from '../lib/updateTask';
+import { persistWorkspace } from '../lib/persistWorkspace';
 
 export class ExecuteViewSubmitHandler {
 	constructor(
@@ -16,7 +17,7 @@ export class ExecuteViewSubmitHandler {
 		private readonly read: IRead,
 		private readonly http: IHttp,
 		private readonly modify: IModify,
-		private readonly persistence: IPersistence
+		private readonly persistence: IPersistence,
         
 	) {}
 
@@ -35,12 +36,14 @@ export class ExecuteViewSubmitHandler {
             case ModalsEnum.CREATE_TASK:
                 await postTask({context,data,room,read,persistence,modify,http});
                 return context.getInteractionResponder().successResponse();                        
-                break;
             case ModalsEnum.GET_TASKS:
                 await getTasks({context,data,room,read,persistence,modify,http});
                 return context.getInteractionResponder().successResponse();    
             case ModalsEnum.EDIT_TASK:
                 await updateTask({context,data,room,read,persistence,modify,http});
+                return context.getInteractionResponder().successResponse(); 
+            case ModalsEnum.SAVE_WORKSPACE:
+                await persistWorkspace({context,data,room,read,persistence,modify,http});
                 return context.getInteractionResponder().successResponse(); 
 			default:
                 break;

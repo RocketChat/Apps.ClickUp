@@ -14,13 +14,16 @@ import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { isUserHighHierarchy, sendDirectMessage } from './src/lib/message';
 import { IAuthData, IOAuth2Client, IOAuth2ClientOptions } from '@rocket.chat/apps-engine/definition/oauth2/IOAuth2';
 import { createOAuth2Client } from '@rocket.chat/apps-engine/definition/oauth2/OAuth2';
-import { create as registerAuthorizedUser } from './src/storage/users';
+import { connect_user_to_clickup_uid } from './src/storage/users';
 import { IMessageButonActions } from './IClickUpApp';
 import { createSectionBlock } from './src/lib/blocks';
 import { ClickUp as ClickUpCommand } from './src/slashcommands/clickUp';
-import { IUIKitInteractionHandler, IUIKitResponse, UIKitBlockInteractionContext, UIKitViewCloseInteractionContext, UIKitViewSubmitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
+import { IUIKitResponse, UIKitBlockInteractionContext, UIKitViewSubmitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
 import { ExecuteBlockActionHandler } from './src/handlers/ExecuteBlockActionHandler';
 import { ExecuteViewSubmitHandler } from './src/handlers/ExecuteViewSubmitHandler';
+import { HttpStatusCode } from '@rocket.chat/apps-engine/definition/accessors';
+
+
 export class ClickUpApp extends App {
 
     public botUsername: string;
@@ -50,23 +53,27 @@ export class ClickUpApp extends App {
     ) {
           
         if (token) {
-            await registerAuthorizedUser(read, persistence, user);
+            const headers = {
+                Authorization: `${token?.token}`,
+            };
+        
+            const userData = await http.get(`https://api.clickup.com/api/v2/user`,{ headers });
+            if(userData.statusCode==HttpStatusCode.OK) {
+                await connect_user_to_clickup_uid(read, persistence, userData.data.user.id, user.id);
+            }
+            
         }  
           
         const text =
-        `The authentication process has succeed! :tada:\n` +
-        `Tomorrow you will start to receive Direct Messages with ` +
-        `your daily task summary and will also be notified for ` +
-        `each task 10 minutes before it starts.\n` +
-        `If you want to change any settings, please click the button ` +
-        `below or type \`/clickup-app settings\` in the text box.`;
+        `The authentication process has succeeded! :tada:\n` +
+        `If you are a workspace admin, retrieve it using ` +
+        `\`/clickup-app get-workspaces\` slash command and ` +
+        `save it for managing its members and tasks.\n` +
+        `If you are just a member of a workspace, you will be notified` +
+        `once your admin assigns you a task.`;
 
-        const button = {
-            actionId: IMessageButonActions.GoToSettings,
-            text: 'Settings',
-        };
 
-        const blocks = await createSectionBlock(modify, text, button);
+        const blocks = await createSectionBlock(modify, text);
 
         await sendDirectMessage(read, modify, user, text, persistence, blocks);
     }
@@ -88,7 +95,7 @@ export class ClickUpApp extends App {
     ): Promise<void> {
         const user = context.user;
 
-        const quickReminder = 'Quick reminder: Let your workspaces users know about the ClickUp App,\
+        const quickReminder = 'Quick reminder: Let your workspace users know about the ClickUp App,\
                             so everyone will be able to manage their tasks/workspaces as well.\n';
 
         const text =
