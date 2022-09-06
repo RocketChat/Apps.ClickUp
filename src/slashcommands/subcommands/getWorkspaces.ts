@@ -1,14 +1,12 @@
 import { IModify, IPersistence, IRead , IHttp, HttpStatusCode} from '@rocket.chat/apps-engine/definition/accessors';
 import { ClickUpApp } from '../../../ClickUpApp';
 import {
-    ISlashCommand,
     SlashCommandContext,
 } from '@rocket.chat/apps-engine/definition/slashcommands';
-import { getTasksModal } from "../../modals/getTasksModal";
-import { persistUIData } from '../../lib/persistence';
 import { ButtonStyle } from '@rocket.chat/apps-engine/definition/uikit';
 import { MiscEnum } from '../../enums/Misc';
 import { getAccessTokenForUser } from '../../storage/users';
+import { storeInteractionRoomData } from '../../storage/roomInteraction';
 
 export async function getWorkspaces(app: ClickUpApp, read: IRead, modify: IModify, context: SlashCommandContext, persistence: IPersistence, http: IHttp): Promise<void> {
     const block = modify.getCreator().getBlockBuilder();
@@ -16,6 +14,7 @@ export async function getWorkspaces(app: ClickUpApp, read: IRead, modify: IModif
     if(triggerId){
         const user = context.getSender();
         const room = context.getRoom();
+        await storeInteractionRoomData(persistence, user.id, room.id);
         const token = await getAccessTokenForUser(read, user);
         const headers = {
             Authorization: `${token?.token}`,

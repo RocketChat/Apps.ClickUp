@@ -1,13 +1,10 @@
 import {
     IHttp,
-    ILogger,
     IModify,
     IPersistence,
     IRead,
 } from "@rocket.chat/apps-engine/definition/accessors";
 import { IApp } from "@rocket.chat/apps-engine/definition/IApp";
-import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
-import { ModalsEnum } from "../enums/Modals";
 import {
     IUIKitResponse,
     UIKitBlockInteractionContext,
@@ -16,17 +13,22 @@ import {  UIKitInteractionContext} from '@rocket.chat/apps-engine/definition/uik
 import { MiscEnum } from "../enums/Misc";
 import { SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashcommands';
 import { getUIData } from '../lib/persistence';
-import { shareTask } from "../lib/shareTask";
-import { deleteTask } from "../lib/deleteTask";
-import { editTask } from "../lib/editTask";
-import { saveWorkspace } from "../lib/saveWorkspace";
-import { getSpaces } from "../lib/getSpaces";
-import { getFolders } from "../lib/getFolders";
-import { getLists } from "../lib/getLists";
+import { shareTask } from "../lib/get/shareTask";
+import { deleteTask } from "../lib/delete/deleteTask";
+import { editTask } from "../lib/get/editTask";
+import { saveWorkspace } from "../lib/get/saveWorkspace";
+import { getSpaces } from "../lib/get/getSpaces";
+import { getFolders } from "../lib/get/getFolders";
+import { getLists } from "../lib/get/getLists";
 import { getTasksModal } from "../modals/getTasksModal";
-import { deleteSpace } from "../lib/deleteSpace";
-import { deleteFolder } from "../lib/deleteFolder";
-import { deleteList } from "../lib/deleteList";
+import { deleteSpace } from "../lib/delete/deleteSpace";
+import { deleteFolder } from "../lib/delete/deleteFolder";
+import { deleteList } from "../lib/delete/deleteList";
+import { ModalsEnum } from "../enums/Modals";
+import { AddSubscriptionModal } from "../modals/addSubscriptionModal";
+import { DeleteSubscriptionModal } from "../modals/deleteSubscriptionModal";
+import { deleteSubscription } from "../lib/deleteSubscription";
+import { subscriptionsModal } from '../modals/subscriptionsModal';
 
 export class ExecuteBlockActionHandler {
     constructor(
@@ -65,6 +67,9 @@ export class ExecuteBlockActionHandler {
                 case MiscEnum.DELETE_TASK_ACTION_ID:
                     await deleteTask({context,data,room,read,persistence,modify,http});
                     return context.getInteractionResponder().successResponse();   
+                case MiscEnum.SUBSCRIBE_TASK_ACTION_ID:
+                    const Subscriptionmodal = await AddSubscriptionModal({modify,read,persistence,http,uikitcontext:context,data:context.getInteractionData().value})
+                    return context.getInteractionResponder().openModalViewResponse(Subscriptionmodal);
                 case MiscEnum.SAVE_WORKSPACE_ACTION_ID:
                     await saveWorkspace({context,data,room,read,persistence,modify,http});
                     return context.getInteractionResponder().successResponse();    
@@ -72,25 +77,38 @@ export class ExecuteBlockActionHandler {
                     await getSpaces({context,data,room,read,persistence,modify,http});
                     return context.getInteractionResponder().successResponse(); 
                 case MiscEnum.DELETE_SPACE_ACTION_ID:
-                        await deleteSpace({context,data,room,read,persistence,modify,http});
-                        return context.getInteractionResponder().successResponse();  
+                    await deleteSpace({context,data,room,read,persistence,modify,http});
+                    return context.getInteractionResponder().successResponse();  
                 case MiscEnum.GET_FOLDERS_ACTION_ID:
                     await getFolders({context,data,room,read,persistence,modify,http});
                     return context.getInteractionResponder().successResponse();      
                 case MiscEnum.DELETE_FOLDER_ACTION_ID:
-                        await deleteFolder({context,data,room,read,persistence,modify,http});
-                        return context.getInteractionResponder().successResponse();  
+                    await deleteFolder({context,data,room,read,persistence,modify,http});
+                    return context.getInteractionResponder().successResponse();  
                 case MiscEnum.GET_LISTS_ACTION_ID:
                     await getLists({context,data,room,read,persistence,modify,http});
                     return context.getInteractionResponder().successResponse(); 
                 case MiscEnum.DELETE_LIST_ACTION_ID:
-                        await deleteList({context,data,room,read,persistence,modify,http});
-                        return context.getInteractionResponder().successResponse();   
+                    await deleteList({context,data,room,read,persistence,modify,http});
+                    return context.getInteractionResponder().successResponse();   
                 case MiscEnum.GET_TASKS_ACTION_ID:
-                    const modal = await getTasksModal({modify,read,persistence,http,data:context.getInteractionData().value});
+                    const getTasksmodal = await getTasksModal({modify,read,persistence,http,data:context.getInteractionData().value});
                     const triggerId= context.getInteractionData().triggerId;
-                    await modify.getUiController().openModalView(modal,{triggerId},context.getInteractionData().user);
+                    await modify.getUiController().openModalView(getTasksmodal,{triggerId},context.getInteractionData().user);
                     return context.getInteractionResponder().successResponse();  
+                case ModalsEnum.OPEN_ADD_SUBSCRIPTIONS_MODAL: 
+                    const addSubscriptionmodal = await AddSubscriptionModal({modify,read,persistence,http,uikitcontext:context})
+                    return context.getInteractionResponder().openModalViewResponse(addSubscriptionmodal);
+                case ModalsEnum.OPEN_DELETE_SUBSCRIPTIONS_MODAL: 
+                    const deleteSubscriptionmodal = await DeleteSubscriptionModal({modify,read,persistence,http,uikitcontext:context})
+                    return context.getInteractionResponder().openModalViewResponse(deleteSubscriptionmodal);
+                case ModalsEnum.DELETE_SUBSCRIPTION_ACTION :
+                    await deleteSubscription({context,data,room,read,persistence,modify,http});
+                    break;
+                case ModalsEnum.SUBSCRIPTION_REFRESH_ACTION:
+                    const subscriptionsmodal = await subscriptionsModal({ modify, read, persistence, http, uikitcontext: context });
+                    await modify.getUiController().updateModalView(subscriptionsmodal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
+                    break;
                 default:
                     break;
             }

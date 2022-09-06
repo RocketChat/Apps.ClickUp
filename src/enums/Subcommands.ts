@@ -5,5 +5,6 @@ export enum Subcommands {
     CreateTask = 'create-task',
     GetTasks = 'get-tasks',
     GetTeams = 'get-teams',
-    GetWorkspaces = 'get-workspaces'
+    GetWorkspaces = 'get-workspaces',
+    Subscribe = 'subscribe',
 };

@@ -1,23 +1,15 @@
 import {
     IHttp,
-    IMessageBuilder,
     IModify,
-    IModifyCreator,
     IPersistence,
     IRead,
 } from "@rocket.chat/apps-engine/definition/accessors";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
-import { IUIKitResponse, TextObjectType, UIKitViewSubmitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
-import {
-    ISlashCommand,
-    SlashCommandContext,
-} from "@rocket.chat/apps-engine/definition/slashcommands";
+import { UIKitViewSubmitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
 import { IUIKitViewSubmitIncomingInteraction } from "@rocket.chat/apps-engine/definition/uikit/UIKitIncomingInteractionTypes";
-import { ICreateTaskState } from "../facade/IClickUpService";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
-import { connect_user_to_clickup_uid, getAccessTokenForUser } from "../storage/users";
+import { connect_user_to_clickup_uid } from "../storage/users";
 import { ModalsEnum } from "../enums/Modals";
-import { HttpStatusCode } from '@rocket.chat/apps-engine/definition/accessors';
 import { persist_workspace } from "./persistence";
 
 export async function persistWorkspace({
@@ -38,13 +30,11 @@ export async function persistWorkspace({
     http: IHttp;
 }) {
     const state = data.view.state;
-    console.log(state)
     const user: IUser = context.getInteractionData().user;
     const workspace_id = data.view.title.text.split("#")[2];
     const workspaceName = data.view.title.text.split("#")[1];
     const membercount = data.view.title.text.split("#")[3]; 
     const teammemberlist = [] as string[];
-    console.log(membercount)
     for(let index=0;index<+membercount;index++){
         const inputbox =  state?.[ModalsEnum.MEMBER_USERNAME_BLOCK+`#${index}`]?.[ModalsEnum.MEMBER_USERNAME_INPUT+`#${index}`];
         const rcusername = inputbox.split(":")[1];

@@ -1,23 +1,16 @@
 import {
     IHttp,
-    IMessageBuilder,
     IModify,
-    IModifyCreator,
     IPersistence,
     IRead,
 } from "@rocket.chat/apps-engine/definition/accessors";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
-import { IUIKitResponse, TextObjectType, UIKitViewSubmitInteractionContext , ButtonStyle} from '@rocket.chat/apps-engine/definition/uikit';
-import {
-    ISlashCommand,
-    SlashCommandContext,
-} from "@rocket.chat/apps-engine/definition/slashcommands";
+import { UIKitViewSubmitInteractionContext , ButtonStyle} from '@rocket.chat/apps-engine/definition/uikit';
 import { IUIKitViewSubmitIncomingInteraction } from "@rocket.chat/apps-engine/definition/uikit/UIKitIncomingInteractionTypes";
-import { ICreateTaskState } from "../facade/IClickUpService";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
-import { getAccessTokenForUser } from "../storage/users";
-import { ModalsEnum } from "../enums/Modals";
-import { MiscEnum } from "../enums/Misc";
+import { getAccessTokenForUser } from "../../storage/users";
+import { ModalsEnum } from "../../enums/Modals";
+import { MiscEnum } from "../../enums/Misc";
 import { HttpStatusCode } from '@rocket.chat/apps-engine/definition/accessors';
 
 export async function getTasks({
@@ -44,6 +37,9 @@ export async function getTasks({
     const archived = state?.[ModalsEnum.ARCHIVED_BLOCK]?.[ModalsEnum.ARCHIVED_ACTION_ID] == "Yes"?"true":"false";
     const subtasks = state?.[ModalsEnum.SUBTASKS_BLOCK]?.[ModalsEnum.SUBTASKS_ACTION_ID] == "Yes"?"true":"false";
     const taskLimit = state?.[ModalsEnum.TASK_LIMIT_BLOCK]?.[ModalsEnum.TASK_LIMIT_INPUT];
+    const incomingtitle = data.view.title.text;
+    let workspace_id;
+    incomingtitle.includes('#') ? workspace_id = incomingtitle.split('#')[1]: workspace_id ='';
     let limit = taskLimit;
     limit > 101 ? 100: limit = taskLimit;
 
@@ -62,6 +58,43 @@ export async function getTasks({
                         text: block.newPlainTextObject(`${task.name}`),
                     });
                     block.addContextBlock({ elements: [ block.newPlainTextObject(`Description: `+`${task.description}`.slice(0, 80) + `...`)]});
+                    if (workspace_id !=''){
+                        block.addActionsBlock({
+                            blockId: MiscEnum.TASK_ACTIONS_BLOCK,
+                            elements: [
+                                block.newButtonElement({
+                                    actionId: MiscEnum.VIEW_TASK_ACTION_ID,
+                                    text: block.newPlainTextObject(MiscEnum.VIEW_TASK_BUTTON),
+                                    value: `${task.url}`,
+                                    url: `${task.url}`,
+                                }),
+                                block.newButtonElement({
+                                    actionId: MiscEnum.SHARE_TASK_ACTION_ID,
+                                    text: block.newPlainTextObject(MiscEnum.SHARE_TASK_BUTTON),
+                                    value: `${task.id}`,
+                                    style: ButtonStyle.PRIMARY,
+                                }),
+                                block.newButtonElement({
+                                    actionId: MiscEnum.EDIT_TASK_ACTION_ID,
+                                    text: block.newPlainTextObject(MiscEnum.EDIT_TASK_BUTTON),
+                                    value: `${task.id}`,
+                                }),
+                                block.newButtonElement({
+                                    actionId: MiscEnum.DELETE_TASK_ACTION_ID,
+                                    text: block.newPlainTextObject(MiscEnum.DELETE_TASK_BUTTON),
+                                    value: `${task.id}`,
+                                    style: ButtonStyle.DANGER,
+                                }),
+                                block.newButtonElement({
+                                    actionId: MiscEnum.SUBSCRIBE_TASK_ACTION_ID,
+                                    text: block.newPlainTextObject(MiscEnum.SUBSCRIBE_TASK_BUTTON),
+                                    value: `${workspace_id},${task.name},${task.id}`,
+                                    style: ButtonStyle.PRIMARY,
+                                }),
+                            ],
+                        });
+                    }
+                    else {
                     block.addActionsBlock({
                         blockId: MiscEnum.TASK_ACTIONS_BLOCK,
                         elements: [
@@ -89,7 +122,7 @@ export async function getTasks({
                                 style: ButtonStyle.DANGER,
                             }),
                         ],
-                    });
+                    });}
                     builder.setBlocks(block);
                 
             }

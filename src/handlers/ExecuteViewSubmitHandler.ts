@@ -1,15 +1,14 @@
 import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
-import { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
 import { UIKitViewSubmitInteractionContext , UIKitInteractionContext} from '@rocket.chat/apps-engine/definition/uikit';
 import { ModalsEnum } from '../enums/Modals';
-import { sendMessage } from '../lib/message';
 import { ClickUpApp } from '../../ClickUpApp';
-import { postTask } from '../lib/postTask';
+import { postTask } from '../lib/post/postTask';
 import { SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashcommands';
 import { getUIData } from '../lib/persistence';
-import { getTasks } from '../lib/getTasks';
-import { updateTask } from '../lib/updateTask';
+import { getTasks } from '../lib/get/getTasks';
+import { updateTask } from '../lib/put/updateTask';
 import { persistWorkspace } from '../lib/persistWorkspace';
+import {persistSubscription} from '../lib/persistSubscription';
 
 export class ExecuteViewSubmitHandler {
 	constructor(
@@ -21,10 +20,15 @@ export class ExecuteViewSubmitHandler {
         
 	) {}
 
-	public async run(context: UIKitViewSubmitInteractionContext,read: IRead,
+	public async run(
+        app:ClickUpApp,
+        context: UIKitViewSubmitInteractionContext,
+        read: IRead,
         http: IHttp,
         persistence: IPersistence,
-        modify: IModify,slashcommandcontext?: SlashCommandContext, uikitcontext?: UIKitInteractionContext) {
+        modify: IModify,
+        slashcommandcontext?: SlashCommandContext, 
+        uikitcontext?: UIKitInteractionContext) {
 		const { user, view } = context.getInteractionData();
         const uiData = await getUIData(read.getPersistenceReader(), user.id);
         const room = uiData.room;
@@ -44,6 +48,9 @@ export class ExecuteViewSubmitHandler {
                 return context.getInteractionResponder().successResponse(); 
             case ModalsEnum.SAVE_WORKSPACE:
                 await persistWorkspace({context,data,room,read,persistence,modify,http});
+                return context.getInteractionResponder().successResponse(); 
+            case ModalsEnum.ADD_SUBSCRIPTION:
+                await persistSubscription({app,context,data,room,read,persistence,modify,http});
                 return context.getInteractionResponder().successResponse(); 
 			default:
                 break;
