@@ -11,6 +11,8 @@ export enum MiscEnum {
     GET_LISTS_BUTTON = 'Get Lists',
     GET_LISTS_ACTION_ID ='get-lists',
     LIST_ACTIONS_BLOCK = 'workspace-actions',
+    CREATE_TASK_BUTTON='Create Task',
+    CREATE_TASK_BUTTON_ACTION_ID='create-task-from-list',
     GET_TASKS_BUTTON = 'Get Tasks',
     GET_TASKS_ACTION_ID ='get-tasks',
     TASK_ACTIONS_BLOCK = 'task-actions',

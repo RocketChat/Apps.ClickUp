@@ -8,7 +8,7 @@ import { getUIData } from '../lib/persistence';
 import { getTasks } from '../lib/get/getTasks';
 import { updateTask } from '../lib/put/updateTask';
 import { persistWorkspace } from '../lib/persistWorkspace';
-import {persistSubscription} from '../lib/persistSubscription';
+import { persistSubscription } from '../lib/persistSubscription';
 
 export class ExecuteViewSubmitHandler {
 	constructor(
