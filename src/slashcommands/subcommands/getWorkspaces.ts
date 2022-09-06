@@ -3,13 +3,12 @@ import { ClickUpApp } from '../../../ClickUpApp';
 import {
     SlashCommandContext,
 } from '@rocket.chat/apps-engine/definition/slashcommands';
-import { ButtonStyle } from '@rocket.chat/apps-engine/definition/uikit';
-import { MiscEnum } from '../../enums/Misc';
 import { getAccessTokenForUser } from '../../storage/users';
 import { storeInteractionRoomData } from '../../storage/roomInteraction';
+import { getWorkspacesModal } from '../../modals/getWorkspacesModal';
+import { persistUIData } from '../../lib/persistence';
 
 export async function getWorkspaces(app: ClickUpApp, read: IRead, modify: IModify, context: SlashCommandContext, persistence: IPersistence, http: IHttp): Promise<void> {
-    const block = modify.getCreator().getBlockBuilder();
     const triggerId = context.getTriggerId();
     if(triggerId){
         const user = context.getSender();
@@ -21,46 +20,9 @@ export async function getWorkspaces(app: ClickUpApp, read: IRead, modify: IModif
         };    
         const response = await http.get(`https://api.clickup.com/api/v2/team`,{ headers });
     if(response.statusCode==HttpStatusCode.OK) {
-        const builder = await modify.getCreator().startMessage().setRoom(room);
-        const block = modify.getCreator().getBlockBuilder();
-        response.data.teams.forEach(async (workspace) => {
-                    block.addSectionBlock({
-                        text: block.newPlainTextObject(`${workspace.name}`),
-                    });
-                    block.addActionsBlock({
-                        blockId: MiscEnum.TASK_ACTIONS_BLOCK,
-                        elements: [
-                            block.newButtonElement({
-                                actionId: MiscEnum.SAVE_WORKSPACE_ACTION_ID,
-                                text: block.newPlainTextObject(MiscEnum.SAVE_WORKSPACE_BUTTON),
-                                value: `${workspace.id}`,
-                                style: ButtonStyle.PRIMARY,
-
-                            }),
-                            block.newButtonElement({
-                                actionId: MiscEnum.GET_SPACES_ACTION_ID,
-                                text: block.newPlainTextObject(MiscEnum.GET_SPACES_BUTTON),
-                                value: `${workspace.id}`,
-                            }),
-                        ],
-                    });
-                    builder.setBlocks(block);
-                
-            
-        });
-        await modify
-                .getNotifier()
-                .notifyUser(user, builder.getMessage());;
-    }
-    else {
-        const textSender = await modify
-        .getCreator()
-        .startMessage()
-        .setText(`❗️ Unable to retrieve workspaces! \n Error ${response.data.err}`);
-        if (room) {
-            textSender.setRoom(room);
-        }
-    await modify.getCreator().finish(textSender);
+        await persistUIData(persistence, context.getSender().id, context);
+        const modal = await getWorkspacesModal({modify,read,persistence,http,slashcommandcontext:context,data:response});
+        await modify.getUiController().openContextualBarView(modal,{triggerId},context.getSender());
     }
     }else{
         this.app.getLogger().error("Invalid Trigger ID");

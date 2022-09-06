@@ -79,7 +79,6 @@ export async function postTask({
         if (room) {
             textSender.setRoom(room);
         }
-    await modify.getCreator().finish(textSender);
     if(rcassignees!==undefined) {
         const rcassigneeslist = `${rcassignees}`.split(",");
     for (let pendingassignee of unauthorized) {
@@ -106,6 +105,7 @@ export async function postTask({
             await modify.getCreator().finish(roombuilder);
         }
     }
+    await modify.getCreator().finish(textSender);
 }
     else {
         const textSender = await modify

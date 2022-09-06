@@ -2,9 +2,8 @@ import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/de
 import { TextObjectType } from '@rocket.chat/apps-engine/definition/uikit/blocks';
 import { IUIKitModalViewParam } from '@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder';
 import { ModalsEnum } from '../enums/Modals';
-import { AppEnum } from '../enums/App';
 import { SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashcommands';
-import { UIKitBlockInteractionContext, UIKitInteractionContext, BlockElementType } from '@rocket.chat/apps-engine/definition/uikit';
+import { UIKitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
 
 export async function saveWorkspaceModal({ modify, read, persistence, http, slashcommandcontext, uikitcontext, data }: { modify: IModify, read: IRead, persistence: IPersistence, http: IHttp ,slashcommandcontext?: SlashCommandContext, uikitcontext?: UIKitInteractionContext, data: any }): Promise<IUIKitModalViewParam> {
     const viewId = ModalsEnum.SAVE_WORKSPACE;
