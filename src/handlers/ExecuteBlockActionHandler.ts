@@ -29,6 +29,7 @@ import { AddSubscriptionModal } from "../modals/addSubscriptionModal";
 import { DeleteSubscriptionModal } from "../modals/deleteSubscriptionModal";
 import { deleteSubscription } from "../lib/deleteSubscription";
 import { subscriptionsModal } from '../modals/subscriptionsModal';
+import { createTaskModal } from "../modals/createTaskModal";
 
 export class ExecuteBlockActionHandler {
     constructor(
@@ -48,6 +49,7 @@ export class ExecuteBlockActionHandler {
         slashcommandcontext?: SlashCommandContext, 
         uikitcontext?: UIKitInteractionContext
     ): Promise<IUIKitResponse> {
+        const triggerId= context.getInteractionData().triggerId;
         const data = context.getInteractionData();
         const { actionId, user } = data;
         const uiData = await getUIData(read.getPersistenceReader(), user.id);
@@ -91,9 +93,12 @@ export class ExecuteBlockActionHandler {
                 case MiscEnum.DELETE_LIST_ACTION_ID:
                     await deleteList({context,data,room,read,persistence,modify,http});
                     return context.getInteractionResponder().successResponse();   
+                case MiscEnum.CREATE_TASK_BUTTON_ACTION_ID:
+                    const createTaskmodal = await createTaskModal({modify,read,persistence,http,data:context.getInteractionData().value});
+                    await modify.getUiController().openModalView(createTaskmodal,{triggerId},context.getInteractionData().user);
+                    return context.getInteractionResponder().successResponse();        
                 case MiscEnum.GET_TASKS_ACTION_ID:
                     const getTasksmodal = await getTasksModal({modify,read,persistence,http,data:context.getInteractionData().value});
-                    const triggerId= context.getInteractionData().triggerId;
                     await modify.getUiController().openModalView(getTasksmodal,{triggerId},context.getInteractionData().user);
                     return context.getInteractionResponder().successResponse();  
                 case ModalsEnum.OPEN_ADD_SUBSCRIPTIONS_MODAL: 

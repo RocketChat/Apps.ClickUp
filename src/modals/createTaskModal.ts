@@ -2,11 +2,10 @@ import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/de
 import { TextObjectType } from '@rocket.chat/apps-engine/definition/uikit/blocks';
 import { IUIKitModalViewParam } from '@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder';
 import { ModalsEnum } from '../enums/Modals';
-import { AppEnum } from '../enums/App';
 import { SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashcommands';
-import { UIKitBlockInteractionContext, UIKitInteractionContext, BlockElementType } from '@rocket.chat/apps-engine/definition/uikit';
+import { UIKitInteractionContext, BlockElementType } from '@rocket.chat/apps-engine/definition/uikit';
 
-export async function createTaskModal({ modify, read, persistence, http, slashcommandcontext, uikitcontext }: { modify: IModify, read: IRead, persistence: IPersistence, http: IHttp ,slashcommandcontext?: SlashCommandContext, uikitcontext?: UIKitInteractionContext }): Promise<IUIKitModalViewParam> {
+export async function createTaskModal({ modify, read, persistence, http, slashcommandcontext, uikitcontext, data }: { modify: IModify, read: IRead, persistence: IPersistence, http: IHttp ,slashcommandcontext?: SlashCommandContext, uikitcontext?: UIKitInteractionContext, data?: string  }): Promise<IUIKitModalViewParam> {
     const viewId = ModalsEnum.CREATE_TASK;
 
     const block = modify.getCreator().getBlockBuilder();
@@ -17,6 +16,8 @@ export async function createTaskModal({ modify, read, persistence, http, slashco
         element: block.newPlainTextInputElement({
             actionId: ModalsEnum.LIST_ID_INPUT,
             placeholder: { text: ModalsEnum.LIST_ID_INPUT_LABEL_DEFAULT, type: TextObjectType.PLAINTEXT },
+            initialValue: data || '',
+
         })
     });
     block.addInputBlock({
