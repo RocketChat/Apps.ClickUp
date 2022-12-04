@@ -46,7 +46,7 @@ export async function saveWorkspace({
     if(response.statusCode==HttpStatusCode.OK) {
         if(triggerId){
         const modal = await saveWorkspaceModal({modify,read,persistence,http,slashcommandcontext,data:workspace});
-        await modify.getUiController().openContextualBarView(modal,{triggerId},user);
+        await modify.getUiController().openModalView(modal,{triggerId},user);
         }else{
             this.app.getLogger().error("Invalid Trigger ID");
         }
