@@ -20,9 +20,9 @@ export async function getWorkspaces(app: ClickUpApp, read: IRead, modify: IModif
         };    
         const response = await http.get(`https://api.clickup.com/api/v2/team`,{ headers });
     if(response.statusCode==HttpStatusCode.OK) {
-        await persistUIData(persistence, context.getSender().id, context);
+        await persistUIData(persistence, user.id, context);
         const modal = await getWorkspacesModal({modify,read,persistence,http,slashcommandcontext:context,data:response});
-        await modify.getUiController().openContextualBarView(modal,{triggerId},context.getSender());
+        await modify.getUiController().openModalView(modal,{triggerId},user);
     }
     }else{
         this.app.getLogger().error("Invalid Trigger ID");

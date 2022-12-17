@@ -43,7 +43,7 @@ export async function getLists({
     
     if(response.statusCode==HttpStatusCode.OK) {
         const modal = await getListsModal({modify,read,persistence,http,data:response,olddata:value});
-        await modify.getUiController().openContextualBarView(modal,{triggerId},user);
+        await modify.getUiController().openModalView(modal,{triggerId},user);
     }
     else {
         const textSender = await modify
