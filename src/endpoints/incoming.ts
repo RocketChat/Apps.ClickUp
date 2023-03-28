@@ -14,6 +14,8 @@ import {
 import { Subscription } from "../storage/subscription";
 import { ISubscription } from "../definitions/subscription";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
+import { retrieveUserByClickUpUserIdAsync } from "../storage/users";
+import { sendDirectMessage } from "../lib/message";
 
 export class clickupWebhooks extends ApiEndpoint {
     public path = "clickupwebhook";
@@ -25,6 +27,9 @@ export class clickupWebhooks extends ApiEndpoint {
         http: IHttp,
         persis: IPersistence
     ): Promise<IApiResponse> {
+        const creator = modify.getCreator();
+        const userReader = read.getUserReader();
+        const roomBuilder = creator.startRoom();
         const payload: any = request.content;
         let subscriptionStorage = new Subscription(persis,read.getPersistenceReader());
         const subscriptions: Array<ISubscription> =
@@ -47,6 +52,21 @@ export class clickupWebhooks extends ApiEndpoint {
                 break;
             case "taskAssigneeUpdated":
                 messageText =  `Task assignees have been changed, use get-tasks command to Edit assignees.`
+                let new_assignee_id = payload?.history_items[0]?.after?.id
+                const rocketChatUser = await retrieveUserByClickUpUserIdAsync(
+                    read,
+                    new_assignee_id
+                );
+                if (rocketChatUser) {
+                    const user = await userReader.getById(
+                        rocketChatUser.rocketChatUserId
+                    );
+                    const msg_to_user =
+                    `Hello, ${user.name}!\n` +
+                    `You have been added as an assignee to the Task ID #${payload.task_id}`
+                    
+                    await sendDirectMessage(read, modify, user, msg_to_user, persis);
+                } 
                 break;
             case "taskDueDateUpdated":
                 let olddueDate = new Date(payload?.history_items[0]?.before *1);

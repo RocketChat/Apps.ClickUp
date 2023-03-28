@@ -14,7 +14,7 @@ import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { isUserHighHierarchy, sendDirectMessage } from './src/lib/message';
 import { IAuthData, IOAuth2Client, IOAuth2ClientOptions } from '@rocket.chat/apps-engine/definition/oauth2/IOAuth2';
 import { createOAuth2Client } from '@rocket.chat/apps-engine/definition/oauth2/OAuth2';
-import { connect_user_to_clickup_uid } from './src/storage/users';
+import { persistUserAsync } from './src/storage/users';
 import { createSectionBlock } from './src/lib/blocks';
 import { ClickUp as ClickUpCommand } from './src/slashcommands/clickUp';
 import { IUIKitResponse, UIKitBlockInteractionContext, UIKitViewSubmitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
@@ -59,7 +59,7 @@ export class ClickUpApp extends App {
         
             const userData = await http.get(`https://api.clickup.com/api/v2/user`,{ headers });
             if(userData.statusCode==HttpStatusCode.OK) {
-                await connect_user_to_clickup_uid(read, persistence, userData.data.user.id, user.id);
+                await persistUserAsync(persistence, user.id, userData.data.user.id);
             }
             
         }  

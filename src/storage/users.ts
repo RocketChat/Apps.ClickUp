@@ -1,33 +1,115 @@
-import { IPersistence, IRead } from "@rocket.chat/apps-engine/definition/accessors";
+import { IPersistence, IPersistenceRead, IRead } from "@rocket.chat/apps-engine/definition/accessors";
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from "@rocket.chat/apps-engine/definition/metadata";
 import { IAuthData, IOAuth2ClientOptions } from "@rocket.chat/apps-engine/definition/oauth2/IOAuth2";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
 
+export interface UserModel {
+    rocketChatUserId: string;
+    clickUpUserId: string;
+}
+
 const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, 'users');
 
-export  async function connect_user_to_clickup_uid(read: IRead, persistence: IPersistence,uid: string, user: string): Promise<void> {
-    const user_association = new RocketChatAssociationRecord(RocketChatAssociationModel.USER, user);
-    const cuid = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, 'clickup_uid');
-    await persistence.updateByAssociations([user_association, cuid], { uid }, true);
-
-}
-export async function get_clickup_uid(read: IRead, user: string): Promise<string | undefined> {
-    const rcuid = await read.getUserReader().getByUsername(user)
-    const associations = [
-        new RocketChatAssociationRecord(
-            RocketChatAssociationModel.USER,
-            rcuid.id,
-        ),
+export const persistUserAsync = async (
+    persis: IPersistence,
+    rocketChatUserId: string,
+    clickUpUserId: string
+): Promise<void> => {
+    const associationsByRocketChatUserId: Array<RocketChatAssociationRecord> = [
         new RocketChatAssociationRecord(
             RocketChatAssociationModel.MISC,
-            `clickup_uid`,
+            'User'
+        ),
+        new RocketChatAssociationRecord(
+            RocketChatAssociationModel.USER,
+            rocketChatUserId
         ),
     ];
-    const [ result ] = await read.getPersistenceReader().readByAssociations(associations);
+    const associationsByTeamsUserId: Array<RocketChatAssociationRecord> = [
+        new RocketChatAssociationRecord(
+            RocketChatAssociationModel.MISC,
+            'User'
+        ),
+        new RocketChatAssociationRecord(
+            RocketChatAssociationModel.USER,
+            clickUpUserId
+        ),
+    ];
+    const data: UserModel = {
+        rocketChatUserId,
+        clickUpUserId,
+    };
 
-    return (result as any)?.uid;
+    await persis.updateByAssociations(
+        associationsByRocketChatUserId,
+        data,
+        true
+    );
+    await persis.updateByAssociations(associationsByTeamsUserId, data, true);
+};
 
-}
+export const retrieveUserByRocketChatUserIdAsync = async (
+    read: IRead,
+    rocketChatUserId: string
+): Promise<UserModel | null> => {
+    const associations: Array<RocketChatAssociationRecord> = [
+        new RocketChatAssociationRecord(
+            RocketChatAssociationModel.MISC,
+            'User'
+        ),
+        new RocketChatAssociationRecord(
+            RocketChatAssociationModel.USER,
+            rocketChatUserId
+        ),
+    ];
+
+    const persistenceRead: IPersistenceRead = read.getPersistenceReader();
+    const results = await persistenceRead.readByAssociations(associations);
+
+    if (results === undefined || results === null || results.length == 0) {
+        return null;
+    }
+
+    if (results.length > 1) {
+        throw new Error(
+            `More than one User record for user ${rocketChatUserId}`
+        );
+    }
+
+    const data: UserModel = results[0] as UserModel;
+    return data;
+};
+
+export const retrieveUserByClickUpUserIdAsync = async (
+    read: IRead,
+    clickUpUserId: string
+): Promise<UserModel | null> => {
+    const associations: Array<RocketChatAssociationRecord> = [
+        new RocketChatAssociationRecord(
+            RocketChatAssociationModel.MISC,
+            'User'
+        ),
+        new RocketChatAssociationRecord(
+            RocketChatAssociationModel.USER,
+            clickUpUserId
+        ),
+    ];
+
+    const persistenceRead: IPersistenceRead = read.getPersistenceReader();
+    const results = await persistenceRead.readByAssociations(associations);
+
+    if (results === undefined || results === null || results.length == 0) {
+        return null;
+    }
+
+    if (results.length > 1) {
+        throw new Error(`More than one User record for user ${clickUpUserId}`);
+    }
+
+    const data: UserModel = results[0] as UserModel;
+    return data;
+};
+
 
 export async function create(read: IRead, persistence: IPersistence, user: IUser): Promise<void> {
     const users = await getAllUsers(read);
