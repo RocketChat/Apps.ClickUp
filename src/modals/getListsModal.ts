@@ -1,64 +1,42 @@
-import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
+import { IHttp, IModify, IPersistence, IRead, IUIKitSurfaceViewParam } from '@rocket.chat/apps-engine/definition/accessors';
 import { ButtonStyle, TextObjectType } from '@rocket.chat/apps-engine/definition/uikit/blocks';
-import { IUIKitModalViewParam } from '@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder';
 import { ModalsEnum } from '../enums/Modals';
 import { SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashcommands';
-import { UIKitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
+import { UIKitInteractionContext, UIKitSurfaceType } from '@rocket.chat/apps-engine/definition/uikit';
 import { MiscEnum } from '../enums/Misc';
+import { getActionsBlock, getButton, getContextBlock, getSectionBlock } from '../helpers/blockBuilder';
+import { Block } from '@rocket.chat/ui-kit';
 
-export async function getListsModal({ modify, read, persistence, http, slashcommandcontext, uikitcontext, data , olddata}: { modify: IModify, read: IRead, persistence: IPersistence, http: IHttp ,slashcommandcontext?: SlashCommandContext, uikitcontext?: UIKitInteractionContext, data?: any , olddata?:string}): Promise<IUIKitModalViewParam> {
-    const viewId = ModalsEnum.GET_LISTS;
-    const block = modify.getCreator().getBlockBuilder();
-    const value = olddata;
-    let limit = data.data.lists.length;
-    data.data.lists.forEach(async (list) => {
-        if (limit == 0) return;
-        if (limit--) {
-                block.addSectionBlock({
-                    text: block.newPlainTextObject(`${list.name}`),
-                });
-                block.addContextBlock({ elements: [ block.newPlainTextObject(`ID: `+`${list.id}` +`${list.priority?` |Priority: `+list.priority.priority``:""}`)]});
-                block.addActionsBlock({
-                    blockId: MiscEnum.LIST_ACTIONS_BLOCK,
-                    elements: [
-                        block.newButtonElement({
-                            actionId: MiscEnum.CREATE_TASK_BUTTON_ACTION_ID,
-                            text: block.newPlainTextObject(MiscEnum.CREATE_TASK_BUTTON),
-                            value: `${list.id}`,
-                            style: ButtonStyle.PRIMARY,
-                        }),
-                        block.newButtonElement({
-                            actionId: MiscEnum.GET_TASKS_ACTION_ID,
-                            text: block.newPlainTextObject(MiscEnum.GET_TASKS_BUTTON),
-                            value: `${value},${list.id}`,
-                            style: ButtonStyle.PRIMARY,
-                        }),
-                        block.newButtonElement({
-                            actionId: MiscEnum.DELETE_LIST_ACTION_ID,
-                            text: block.newPlainTextObject(MiscEnum.DELETE_LIST_BUTTON),
-                            value: `${list.id}`,
-                            style: ButtonStyle.DANGER,
-                        }),
-                    ],
-                });
-            
-        }
-    });
+export async function getListsModal({ modify, read, persistence, http, slashcommandcontext, uikitcontext, data, olddata }: { modify: IModify; read: IRead; persistence: IPersistence; http: IHttp; slashcommandcontext?: SlashCommandContext; uikitcontext?: UIKitInteractionContext; data?: any; olddata?: string }): Promise<IUIKitSurfaceViewParam> {
+  const viewId = ModalsEnum.GET_LISTS;
+  const block: Block[] = [];
+  const value = olddata;
+  let limit = data.data.lists.length;
+  for (const list of data.data.lists) {
+    if (limit == 0) break;
+    if (limit--) {
+      let listNameSectionBlock = await getSectionBlock(`${list.name}`);
 
+      let listContextBlock = await getContextBlock(`ID: ` + `${list.id}` + `${list.priority ? ` |Priority: ` + list.priority.priority`` : ''}`);
 
+      let createTaskButton = await getButton(MiscEnum.CREATE_TASK_BUTTON, MiscEnum.LIST_ACTIONS_BLOCK, MiscEnum.CREATE_TASK_BUTTON_ACTION_ID, `${list.id}`, ButtonStyle.PRIMARY);
+      let getTaskButton = await getButton(MiscEnum.GET_TASKS_BUTTON, MiscEnum.LIST_ACTIONS_BLOCK, MiscEnum.GET_TASKS_ACTION_ID, `${value},${list.id}`, ButtonStyle.PRIMARY);
+      let deleteListButton = await getButton(MiscEnum.DELETE_LIST_BUTTON, MiscEnum.LIST_ACTIONS_BLOCK, MiscEnum.DELETE_LIST_ACTION_ID, `${list.id}`, ButtonStyle.DANGER);
+      let listActionBlock = await getActionsBlock(MiscEnum.LIST_ACTIONS_BLOCK, [createTaskButton, getTaskButton, deleteListButton]);
 
-    return {
-        id: viewId,
-        title: {
-            type: TextObjectType.PLAINTEXT,
-            text: ModalsEnum.GET_LISTS_MODAL_NAME,
-        },
-        close: block.newButtonElement({
-            text: {
-                type: TextObjectType.PLAINTEXT,
-                text: 'Close',
-            },
-        }),
-        blocks: block.getBlocks(),
-    };
+      block.push(listNameSectionBlock, listContextBlock, listActionBlock);
+    }
+  }
+
+  let closeButton = await getButton('Close', '', '');
+  return {
+    id: viewId,
+    type: UIKitSurfaceType.MODAL,
+    title: {
+      type: 'plain_text',
+      text: ModalsEnum.GET_LISTS_MODAL_NAME,
+    },
+    close: closeButton,
+    blocks: block,
+  };
 }

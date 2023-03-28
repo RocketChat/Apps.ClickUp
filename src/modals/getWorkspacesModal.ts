@@ -1,53 +1,36 @@
-import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
-import { ButtonStyle, TextObjectType } from '@rocket.chat/apps-engine/definition/uikit/blocks';
-import { IUIKitModalViewParam } from '@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder';
+import { IHttp, IModify, IPersistence, IRead, IUIKitSurfaceViewParam } from '@rocket.chat/apps-engine/definition/accessors';
+import { ButtonStyle } from '@rocket.chat/apps-engine/definition/uikit/blocks';
 import { ModalsEnum } from '../enums/Modals';
 import { SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashcommands';
-import { UIKitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
+import { UIKitInteractionContext, UIKitSurfaceType } from '@rocket.chat/apps-engine/definition/uikit';
 import { MiscEnum } from '../enums/Misc';
-export async function getWorkspacesModal({ modify, read, persistence, http, slashcommandcontext, uikitcontext, data }: { modify: IModify, read: IRead, persistence: IPersistence, http: IHttp ,slashcommandcontext?: SlashCommandContext, uikitcontext?: UIKitInteractionContext, data?: any }): Promise<IUIKitModalViewParam> {
+import { getActionsBlock, getButton, getSectionBlock } from '../helpers/blockBuilder';
+import { Block } from '@rocket.chat/ui-kit';
 
-    const viewId = ModalsEnum.GET_WORKSPACES;
-    const block = modify.getCreator().getBlockBuilder();
-    data.data.teams.forEach(async (workspace) => {
-                block.addSectionBlock({
-                    text: block.newPlainTextObject(`${workspace.name}`),
-                });
-                block.addActionsBlock({
-                    blockId: MiscEnum.TASK_ACTIONS_BLOCK,
-                    elements: [
-                        block.newButtonElement({
-                            actionId: MiscEnum.SAVE_WORKSPACE_ACTION_ID,
-                            text: block.newPlainTextObject(MiscEnum.SAVE_WORKSPACE_BUTTON),
-                            value: `${workspace.id}`,
-                            style: ButtonStyle.PRIMARY,
+export async function getWorkspacesModal({ modify, read, persistence, http, slashcommandcontext, uikitcontext, data }: { modify: IModify; read: IRead; persistence: IPersistence; http: IHttp; slashcommandcontext?: SlashCommandContext; uikitcontext?: UIKitInteractionContext; data?: any }): Promise<IUIKitSurfaceViewParam> {
+  const viewId = ModalsEnum.GET_WORKSPACES;
+  const block: Block[] = [];
 
-                        }),
-                        block.newButtonElement({
-                            actionId: MiscEnum.GET_SPACES_ACTION_ID,
-                            text: block.newPlainTextObject(MiscEnum.GET_SPACES_BUTTON),
-                            value: `${workspace.id}`,
-                        }),
-                    ],
-                });
-            
-        
-    });
-   
+  for (const workspace of data.data.teams) {
+    let workspaceNameSectionBlock = await getSectionBlock(`${workspace.name}`);
 
+    let saveWorkspaceButton = await getButton(MiscEnum.SAVE_WORKSPACE_BUTTON, MiscEnum.TASK_ACTIONS_BLOCK, MiscEnum.SAVE_WORKSPACE_ACTION_ID, `${workspace.id}`, ButtonStyle.PRIMARY);
+    let getSpacesButton = await getButton(MiscEnum.GET_SPACES_BUTTON, MiscEnum.TASK_ACTIONS_BLOCK, MiscEnum.GET_SPACES_ACTION_ID, `${workspace.id}`);
+    let taskActionBlock = await getActionsBlock(MiscEnum.TASK_ACTIONS_BLOCK, [saveWorkspaceButton, getSpacesButton]);
+    
+    block.push(workspaceNameSectionBlock, taskActionBlock);
+  }
 
-    return {
-        id: viewId,
-        title: {
-            type: TextObjectType.PLAINTEXT,
-            text: ModalsEnum.GET_WORKSPACES_MODAL_NAME,
-        },
-        close: block.newButtonElement({
-            text: {
-                type: TextObjectType.PLAINTEXT,
-                text: 'Close',
-            },
-        }),
-        blocks: block.getBlocks(),
-    };
+  let closeButton = await getButton('Close', '', '');
+
+  return {
+    id: viewId,
+    type: UIKitSurfaceType.MODAL,
+    title: {
+      type: 'plain_text',
+      text: ModalsEnum.GET_WORKSPACES_MODAL_NAME,
+    },
+    close: closeButton,
+    blocks: block,
+  };
 }

@@ -95,11 +95,11 @@ export class ExecuteBlockActionHandler {
                     return context.getInteractionResponder().successResponse();   
                 case MiscEnum.CREATE_TASK_BUTTON_ACTION_ID:
                     const createTaskmodal = await createTaskModal({modify,read,persistence,http,data:context.getInteractionData().value});
-                    await modify.getUiController().openModalView(createTaskmodal,{triggerId},context.getInteractionData().user);
+                    await modify.getUiController().openSurfaceView(createTaskmodal,{triggerId},context.getInteractionData().user);
                     return context.getInteractionResponder().successResponse();        
                 case MiscEnum.GET_TASKS_ACTION_ID:
                     const getTasksmodal = await getTasksModal({modify,read,persistence,http,data:context.getInteractionData().value});
-                    await modify.getUiController().openModalView(getTasksmodal,{triggerId},context.getInteractionData().user);
+                    await modify.getUiController().openSurfaceView(getTasksmodal,{triggerId},context.getInteractionData().user);
                     return context.getInteractionResponder().successResponse();  
                 case ModalsEnum.OPEN_ADD_SUBSCRIPTIONS_MODAL: 
                     const addSubscriptionmodal = await AddSubscriptionModal({modify,read,persistence,http,uikitcontext:context})
@@ -112,7 +112,7 @@ export class ExecuteBlockActionHandler {
                     break;
                 case ModalsEnum.SUBSCRIPTION_REFRESH_ACTION:
                     const subscriptionsmodal = await subscriptionsModal({ modify, read, persistence, http, uikitcontext: context });
-                    await modify.getUiController().updateModalView(subscriptionsmodal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
+                    await modify.getUiController().updateSurfaceView(subscriptionsmodal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
                     break;
                 default:
                     break;

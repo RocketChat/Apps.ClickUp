@@ -43,7 +43,7 @@ export async function getFolders({
     
     if(response.statusCode==HttpStatusCode.OK) {
         const modal = await getFoldersModal({modify,read,persistence,http,data:response,olddata:value});
-        await modify.getUiController().openModalView(modal,{triggerId},user);
+        await modify.getUiController().openSurfaceView(modal,{triggerId},user);
     }
     else {
         const textSender = await modify

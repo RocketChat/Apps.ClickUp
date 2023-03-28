@@ -32,5 +32,4 @@ export enum MiscEnum {
     DELETE_FOLDER_ACTION_ID = 'delete-folder',
     DELETE_LIST_BUTTON = 'Delete',
     DELETE_LIST_ACTION_ID = 'delete-list',
-
 }

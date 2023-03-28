@@ -1,70 +1,62 @@
-import {
-    IHttp,
-    IModify,
-    IPersistence,
-    IRead,
-} from '@rocket.chat/apps-engine/definition/accessors';
+import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
-import {
-    ISlashCommand,
-    SlashCommandContext,
-} from '@rocket.chat/apps-engine/definition/slashcommands';
+import { ISlashCommand, SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashcommands';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { ClickUpApp } from '../../ClickUpApp';
 import { Subcommands } from '../enums/Subcommands';
 import { sendNotification } from '../lib/message';
 import { authorize } from './subcommands/authorize';
-import {createTask} from './subcommands/createTask';
-import {getTasks} from './subcommands/getTasks';
+import { createTask } from './subcommands/createTask';
+import { getTasks } from './subcommands/getTasks';
 import { getWorkspaces } from './subcommands/getWorkspaces';
 import { subscribe } from './subcommands/subscribe';
 
 export class ClickUp implements ISlashCommand {
-    public command = 'clickup-app';
-    public i18nParamsExample = 'slashcommand_params';
-    public i18nDescription = 'slashcommand_description';
-    public providesPreview = false;
+  public command = 'clickup-app';
+  public i18nParamsExample = 'slashcommand_params';
+  public i18nDescription = 'slashcommand_description';
+  public providesPreview = false;
 
-    constructor(private readonly app: ClickUpApp) {}
+  constructor(private readonly app: ClickUpApp) {}
 
-    public async executor(context: SlashCommandContext, read: IRead, modify: IModify, http: IHttp, persistence: IPersistence): Promise<void> {
-        const command = this.getCommandFromContextArguments(context);
-        if (!command) {
-            return await this.displayAppHelpMessage(read, modify, context.getSender(), context.getRoom());
-        }
-
-        switch (command) {
-            case Subcommands.Help:
-                await this.displayAppHelpMessage(read, modify, context.getSender(), context.getRoom());
-                break;
-            case Subcommands.Auth:
-                await authorize(this.app, read, modify, context.getSender(), persistence);
-                break;
-            case Subcommands.CreateTask:
-                await createTask(this.app, read, modify, context, persistence, http);
-                break;
-            case Subcommands.GetTasks:
-                await getTasks(this.app, read, modify, context, persistence, http);
-                break;
-            case Subcommands.GetWorkspaces:
-                await getWorkspaces(this.app, read, modify, context, persistence, http);
-                break;
-            case Subcommands.Subscribe:
-                await subscribe(this.app, read, modify, context, persistence, http);
-                break;
-            default:
-                await this.displayAppHelpMessage(read, modify, context.getSender(), context.getRoom());
-                break;
-        }
+  public async executor(context: SlashCommandContext, read: IRead, modify: IModify, http: IHttp, persistence: IPersistence): Promise<void> {
+    const command = this.getCommandFromContextArguments(context);
+    if (!command) {
+      return await this.displayAppHelpMessage(read, modify, context.getSender(), context.getRoom());
     }
 
-    private getCommandFromContextArguments(context: SlashCommandContext): string {
-        const [command] = context.getArguments();
-        return command;
+    switch (command) {
+      case Subcommands.Help:
+        await this.displayAppHelpMessage(read, modify, context.getSender(), context.getRoom());
+        break;
+      case Subcommands.Auth:
+        await authorize(this.app, read, modify, context.getSender(), persistence);
+        break;
+      case Subcommands.CreateTask:
+        await createTask(this.app, read, modify, context, persistence, http);
+        break;
+      case Subcommands.GetTasks:
+        await getTasks(this.app, read, modify, context, persistence, http);
+        break;
+      case Subcommands.GetWorkspaces:
+        await getWorkspaces(this.app, read, modify, context, persistence, http);
+        break;
+      case Subcommands.Subscribe:
+        await subscribe(this.app, read, modify, context, persistence, http);
+        break;
+      default:
+        await this.displayAppHelpMessage(read, modify, context.getSender(), context.getRoom());
+        break;
     }
+  }
 
-    private async displayAppHelpMessage(read: IRead, modify: IModify, user: IUser, room: IRoom): Promise<void> {
-        const text = `ClickUp App provides you the following slash commands, /clickup-app:
+  private getCommandFromContextArguments(context: SlashCommandContext): string {
+    const [command] = context.getArguments();
+    return command;
+  }
+
+  private async displayAppHelpMessage(read: IRead, modify: IModify, user: IUser, room: IRoom): Promise<void> {
+    const text = `ClickUp App provides you the following slash commands, /clickup-app:
 
     1) *help:* shows this list.
     2) *auth:* starts the process to authorize your ClickUp Account.
@@ -72,6 +64,6 @@ export class ClickUp implements ISlashCommand {
     4) *create-task*: lets you create a new task.
     4) *get-tasks*: lets you retreive your tasks.    `;
 
-        return sendNotification(read, modify, user, room, text);
-    }
+    return sendNotification(read, modify, user, room, text);
+  }
 }

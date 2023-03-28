@@ -1,7 +1,7 @@
 {
     "id": "b3252284-88b0-4ef4-b81c-3a644ed0e401",
     "version": "0.0.1",
-    "requiredApiVersion": "1.36.0",
+    "requiredApiVersion": "^1.19.0",
     "iconFile": "icon.png",
     "author": {
         "name": "Mustafa Hasan Khan",
