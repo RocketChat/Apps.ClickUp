@@ -13,4 +13,5 @@
     "classFile": "ClickUpApp.ts",
     "description": "This app integrates ClickUp with Rocket.Chat, thus allowing users to seamlessly manage their workspaces, folders, lists and tasks.",
     "implements": []
+
 }
