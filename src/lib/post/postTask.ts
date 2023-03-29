@@ -8,7 +8,7 @@ import { IRoom, RoomType } from "@rocket.chat/apps-engine/definition/rooms";
 import { UIKitViewSubmitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
 import { IUIKitViewSubmitIncomingInteraction } from "@rocket.chat/apps-engine/definition/uikit/UIKitIncomingInteractionTypes";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
-import { getAccessTokenForUser, get_clickup_uid } from "../../storage/users";
+import { getAccessTokenForUser, retrieveUserByRocketChatUserIdAsync } from "../../storage/users";
 import { ModalsEnum } from "../../enums/Modals";
 import { HttpStatusCode } from '@rocket.chat/apps-engine/definition/accessors';
 import { sendDirectMessage } from "../message";
@@ -48,9 +48,10 @@ export async function postTask({
     if(rcassignees!==undefined) {
     const rcassigneeslist = `${rcassignees}`.split(",");
     for (let rcassignee of rcassigneeslist) {
-        let cuassignee = await get_clickup_uid(read, rcassignee);
+        const RCUser = await read.getUserReader().getByUsername(rcassignee)
+        let cuassignee = await retrieveUserByRocketChatUserIdAsync(read, RCUser.id);
         if(cuassignee!==undefined) {
-            cuassignees.push(cuassignee);
+            cuassignees.push(cuassignee!.clickUpUserId);
             authorized.push(rcassignee);}
         else {
             unauthorized.push(rcassignee);
