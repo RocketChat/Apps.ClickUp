@@ -11,6 +11,7 @@ import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { getAccessTokenForUser } from "../../storage/users";
 
 import { HttpStatusCode } from '@rocket.chat/apps-engine/definition/accessors';
+import { getListUrl } from "../const";
 
 export async function deleteList({
     context,
@@ -35,8 +36,8 @@ export async function deleteList({
     const headers = {
         Authorization: `${token?.token}`,
     };
-
-    const response = await http.del(`https://api.clickup.com/api/v2/list/${list_id}/`,{ headers });
+    const url = getListUrl(list_id!);
+    const response = await http.del(url, { headers });
     if(response.statusCode==HttpStatusCode.OK) {
         const textSender = await modify
         .getCreator()

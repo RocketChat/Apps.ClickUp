@@ -11,6 +11,7 @@ import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { getAccessTokenForUser } from "../../storage/users";
 import { HttpStatusCode } from '@rocket.chat/apps-engine/definition/accessors';
 import { getSpacesModal } from "../../modals/getSpacesModal";
+import { getSpacesOfUrl } from "../const";
 
 export async function getSpaces({
     context,
@@ -37,7 +38,8 @@ export async function getSpaces({
     const headers = {
         Authorization: `${token?.token}`,
     };
-     const response = await http.get(`https://api.clickup.com/api/v2/team/${workspace_id}/space?archived=false`,{ headers });   
+    const url = getSpacesOfUrl(workspace_id!);
+     const response = await http.get(url, { headers });   
     if(response.statusCode==HttpStatusCode.OK) {
         const modal = await getSpacesModal({modify,read,persistence,http,data:response,wid:workspace_id});
         await modify.getUiController().openModalView(modal,{triggerId},user);

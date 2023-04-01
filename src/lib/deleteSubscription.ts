@@ -14,6 +14,7 @@ import { HttpStatusCode } from '@rocket.chat/apps-engine/definition/accessors';
 import { storeInteractionRoomData, getInteractionRoomData } from "../storage/roomInteraction";
 import { Subscription } from "../storage/subscription";
 import { sendNotification } from "./message";
+import { getWebhookApiUrl } from "./const";
 
 export async function deleteSubscription({
     context,
@@ -50,7 +51,8 @@ export async function deleteSubscription({
     const headers = {
         Authorization: `${token?.token}`,
     };
-    const response = await http.del(`https://api.clickup.com/api/v2/webhook/${webhook_id}`,{ headers});
+    const url = getWebhookApiUrl(webhook_id!);
+    const response = await http.del(url, { headers});
 
     if(response.statusCode==HttpStatusCode.OK) {
         const textSender = await modify

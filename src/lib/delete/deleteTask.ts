@@ -10,6 +10,7 @@ import { IUIKitBaseIncomingInteraction } from "@rocket.chat/apps-engine/definiti
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { getAccessTokenForUser } from "../../storage/users";
 import { HttpStatusCode } from '@rocket.chat/apps-engine/definition/accessors';
+import { getTaskUrl } from "../const";
 
 export async function deleteTask({
     context,
@@ -34,8 +35,8 @@ export async function deleteTask({
     const headers = {
         Authorization: `${token?.token}`,
     };
-
-    const response = await http.del(`https://api.clickup.com/api/v2/task/${task_id}/`,{ headers });
+    const url = getTaskUrl(task_id!);
+    const response = await http.del(url, { headers });
     if(response.statusCode==HttpStatusCode.NO_CONTENT) {
         const textSender = await modify
         .getCreator()

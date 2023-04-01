@@ -11,6 +11,7 @@ import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { getAccessTokenForUser } from "../../storage/users";
 import { HttpStatusCode } from '@rocket.chat/apps-engine/definition/accessors';
 import { getListsModal } from "../../modals/getListsModal";
+import { getListsOfUrl } from "../const";
 
 export async function getLists({
     context,
@@ -38,8 +39,8 @@ export async function getLists({
     const headers = {
         Authorization: `${token?.token}`,
     };
-
-    const response = await http.get(`https://api.clickup.com/api/v2/folder/${folder_id}/list?archived=false`,{ headers });
+    const url = getListsOfUrl(folder_id!);
+    const response = await http.get(url, { headers });
     
     if(response.statusCode==HttpStatusCode.OK) {
         const modal = await getListsModal({modify,read,persistence,http,data:response,olddata:value});

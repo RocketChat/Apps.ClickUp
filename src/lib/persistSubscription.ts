@@ -8,12 +8,13 @@ import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { UIKitViewSubmitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
 import { IUIKitViewSubmitIncomingInteraction } from "@rocket.chat/apps-engine/definition/uikit/UIKitIncomingInteractionTypes";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
-import { connect_user_to_clickup_uid, getAccessTokenForUser } from "../storage/users";
+import { getAccessTokenForUser } from "../storage/users";
 import { ModalsEnum } from "../enums/Modals";
 import { getWebhookUrl } from '../helpers/getWebhookURL';
-import {  Subscription } from "../storage/subscription";
+import { Subscription } from "../storage/subscription";
 import { getInteractionRoomData } from "../storage/roomInteraction";
 import { ClickUpApp } from "../../ClickUpApp";
+import { postWebhookUrl } from "./const";
 
 export async function persistSubscription({
     app,
@@ -52,8 +53,8 @@ export async function persistSubscription({
         'events' : `*`,
         
     }
- 
-    const api_response = await http.post(`https://api.clickup.com/api/v2/team/${workspace_id}/webhook`,{ headers , data: body});
+    const api_url = postWebhookUrl(workspace_id);
+    const api_response = await http.post(api_url, { headers , data: body});
     let subscriptionStorage = new Subscription(persistence, read.getPersistenceReader());
     let hookId = "";
     let subscriptions = await subscriptionStorage.getSubscriptionsByTask(task_id, user.id);

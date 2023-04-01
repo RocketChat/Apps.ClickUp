@@ -12,6 +12,7 @@ import { getAccessTokenForUser, retrieveUserByRocketChatUserIdAsync } from "../.
 import { ModalsEnum } from "../../enums/Modals";
 import { HttpStatusCode } from '@rocket.chat/apps-engine/definition/accessors';
 import { sendDirectMessage } from "../message";
+import { postTaskUrl } from "../const";
 
 export async function postTask({
     context,
@@ -69,8 +70,8 @@ export async function postTask({
         'assignees' : cuassignees,
         'priority': `${taskPriority}`,
     }
- 
-    const response = await http.post(`https://api.clickup.com/api/v2/list/${list_id}/task`,{ headers , data: body});
+    const url = postTaskUrl(list_id!)
+    const response = await http.post(url, { headers , data: body});
 
     if(response.statusCode==HttpStatusCode.OK) {
         const textSender = await modify
