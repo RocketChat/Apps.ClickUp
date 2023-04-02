@@ -11,6 +11,7 @@ import { Subscription } from '../storage/subscription';
 import { ISubscription } from '../definitions/subscription';
 import { ITaskSubscription } from '../definitions/taskSubscription';
 import { MiscEnum } from '../enums/Misc';
+import { viewTaskUrl } from '../lib/const';
 
 export async function subscriptionsModal({ modify, read, persistence, http, slashcommandcontext, uikitcontext }: { modify: IModify, read: IRead, persistence: IPersistence, http: IHttp ,slashcommandcontext?: SlashCommandContext, uikitcontext?: UIKitInteractionContext }): Promise<IUIKitModalViewParam> {
     const viewId = ModalsEnum.SUBSCRIPTION_VIEW;
@@ -68,7 +69,7 @@ export async function subscriptionsModal({ modify, read, persistence, http, slas
                     actionId: MiscEnum.VIEW_TASK_ACTION_ID,
                     text: block.newPlainTextObject(MiscEnum.VIEW_TASK_BUTTON),
                     value: `${taskId}`,
-                    url: `https://app.clickup.com/t/${taskId}`,
+                    url: viewTaskUrl(taskId),
                 })
             });
             index++;

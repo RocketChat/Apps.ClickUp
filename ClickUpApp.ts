@@ -23,6 +23,7 @@ import { ExecuteViewSubmitHandler } from './src/handlers/ExecuteViewSubmitHandle
 import { HttpStatusCode } from '@rocket.chat/apps-engine/definition/accessors';
 import { ApiSecurity, ApiVisibility } from '@rocket.chat/apps-engine/definition/api';
 import {clickupWebhooks} from './src/endpoints/incoming'
+import { getProfileUrl } from './src/lib/const';
 
 export class ClickUpApp extends App {
 
@@ -56,8 +57,8 @@ export class ClickUpApp extends App {
             const headers = {
                 Authorization: `${token?.token}`,
             };
-        
-            const userData = await http.get(`https://api.clickup.com/api/v2/user`,{ headers });
+            const url = getProfileUrl();
+            const userData = await http.get(url, { headers });
             if(userData.statusCode==HttpStatusCode.OK) {
                 await persistUserAsync(persistence, user.id, userData.data.user.id);
             }

@@ -12,6 +12,7 @@ import { getAccessTokenForUser } from "../../storage/users";
 import { ModalsEnum } from "../../enums/Modals";
 import { MiscEnum } from "../../enums/Misc";
 import { HttpStatusCode } from '@rocket.chat/apps-engine/definition/accessors';
+import { getTasksOfUrl } from "../const";
 
 export async function getTasks({
     context,
@@ -42,12 +43,11 @@ export async function getTasks({
     incomingtitle.includes('#') ? workspace_id = incomingtitle.split('#')[1]: workspace_id ='';
     let limit = taskLimit;
     limit > 101 ? 100: limit = taskLimit;
-
     const headers = {
         Authorization: `${token?.token}`,
     };
-
-    const response = await http.get(`https://api.clickup.com/api/v2/list/${list_id}/task?archived=${archived}&subtasks=${subtasks}`,{ headers });
+    const url = getTasksOfUrl(list_id!, archived!, subtasks!);
+    const response = await http.get(url, { headers });
     if(response.statusCode==HttpStatusCode.OK) {
         const builder = await modify.getCreator().startMessage().setRoom(room);
         const block = modify.getCreator().getBlockBuilder();

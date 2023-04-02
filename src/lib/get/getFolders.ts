@@ -11,6 +11,7 @@ import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { getAccessTokenForUser } from "../../storage/users";
 import { HttpStatusCode } from '@rocket.chat/apps-engine/definition/accessors';
 import { getFoldersModal } from "../../modals/getFoldersModal";
+import { getFoldersOfUrl } from "../const";
 
 export async function getFolders({
     context,
@@ -38,8 +39,8 @@ export async function getFolders({
     const headers = {
         Authorization: `${token?.token}`,
     };
-
-    const response = await http.get(`https://api.clickup.com/api/v2/space/${space_id}/folder?archived=false`,{ headers });
+    const url = getFoldersOfUrl(space_id!);
+    const response = await http.get(url, { headers });
     
     if(response.statusCode==HttpStatusCode.OK) {
         const modal = await getFoldersModal({modify,read,persistence,http,data:response,olddata:value});
