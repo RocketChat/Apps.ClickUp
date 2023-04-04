@@ -22,7 +22,7 @@ import { ExecuteBlockActionHandler } from './src/handlers/ExecuteBlockActionHand
 import { ExecuteViewSubmitHandler } from './src/handlers/ExecuteViewSubmitHandler';
 import { HttpStatusCode } from '@rocket.chat/apps-engine/definition/accessors';
 import { ApiSecurity, ApiVisibility } from '@rocket.chat/apps-engine/definition/api';
-import {clickupWebhooks} from './src/endpoints/incoming'
+import { clickupWebhooks} from './src/endpoints/incoming'
 import { getProfileUrl } from './src/lib/const';
 
 export class ClickUpApp extends App {

@@ -8,7 +8,7 @@ import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { UIKitViewSubmitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
 import { IUIKitViewSubmitIncomingInteraction } from "@rocket.chat/apps-engine/definition/uikit/UIKitIncomingInteractionTypes";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
-import { connect_user_to_clickup_uid } from "../storage/users";
+import { persistUserAsync } from "../storage/users";
 import { ModalsEnum } from "../enums/Modals";
 import { persist_workspace } from "./persistence";
 
@@ -41,7 +41,7 @@ export async function persistWorkspace({
         const clickup_uid = inputbox.split(":")[0];
         teammemberlist.push(`${rcusername}:${clickup_uid}`)
         const rcuser = await read.getUserReader().getByUsername(rcusername)
-        await connect_user_to_clickup_uid(read, persistence, clickup_uid, rcuser.id);
+        await persistUserAsync(persistence, rcuser.id, clickup_uid);
     }
     try {
         await persist_workspace(read,persistence,user.id,`${workspace_id}:${workspaceName}`,teammemberlist)
