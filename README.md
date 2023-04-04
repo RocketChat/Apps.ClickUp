@@ -32,7 +32,7 @@ The application allows users to create and manage thier tasks and workspace, sub
     - `user_username` is the username of your admin user.
     - `user_password` is the password of your admin user.
 
-    For more info refer [this](https://rocket.chat/docs/developer-guides/developing-apps/getting-started/) guide
+    For more info refer [this](https://developer.rocket.chat/apps-engine/getting-started/rocket.chat-app-engine-cli) guide
 
 <h2>📲 Setup guide </h2>
  <ul>
