@@ -9,6 +9,7 @@ import { MiscEnum } from "../../enums/Misc";
 import { HttpStatusCode } from "@rocket.chat/apps-engine/definition/accessors";
 import { Block } from "@rocket.chat/ui-kit";
 import { getActionsBlock, getButton, getContextBlock, getSectionBlock } from "../../helpers/blockBuilder";
+import { getTasksOfUrl } from "../const";
 
 export async function getTasks({ context, data, room, read, persistence, modify, http }: { context: UIKitViewSubmitInteractionContext; data: IUIKitViewSubmitIncomingInteraction; room: IRoom; read: IRead; persistence: IPersistence; modify: IModify; http: IHttp }) {
   const state = data.view.state;
@@ -28,7 +29,8 @@ export async function getTasks({ context, data, room, read, persistence, modify,
     Authorization: `${token?.token}`,
   };
 
-  const response = await http.get(`https://api.clickup.com/api/v2/list/${list_id}/task?archived=${archived}&subtasks=${subtasks}`, { headers });
+  const url = getTasksOfUrl(list_id!, archived!, subtasks!);
+  const response = await http.get(url, { headers });
   if (response.statusCode == HttpStatusCode.OK) {
     const builder = await modify.getCreator().startMessage().setRoom(room);
     const block: Block[] = [];

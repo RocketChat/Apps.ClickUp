@@ -9,6 +9,8 @@ import { MiscEnum } from '../enums/Misc';
 import { Block } from '@rocket.chat/ui-kit';
 import { getActionsBlock, getButton, getDividerBlock, getSectionBlock } from '../helpers/blockBuilder';
 import { ButtonStyle, UIKitInteractionContext, UIKitSurfaceType } from '@rocket.chat/apps-engine/definition/uikit';
+import { viewTaskUrl } from '../lib/const';
+
 
 export async function subscriptionsModal({ modify, read, persistence, http, slashcommandcontext, uikitcontext }: { modify: IModify; read: IRead; persistence: IPersistence; http: IHttp; slashcommandcontext?: SlashCommandContext; uikitcontext?: UIKitInteractionContext }): Promise<IUIKitSurfaceViewParam> {
   const viewId = ModalsEnum.SUBSCRIPTION_VIEW;
@@ -32,6 +34,7 @@ export async function subscriptionsModal({ modify, read, persistence, http, slas
 
     let dividerblock = await getDividerBlock();
     block.push(dividerblock);
+
 
     let vartaskData = new Map<string, ITaskSubscription>();
     for (let subscription of roomSubscriptions) {
@@ -60,7 +63,7 @@ export async function subscriptionsModal({ modify, read, persistence, http, slas
       let taskId = task.taskId;
       let taskUser = task.user;
 
-      let viewTaskButton = await getButton(MiscEnum.VIEW_TASK_BUTTON, '', MiscEnum.VIEW_TASK_ACTION_ID, `${taskId}`, ButtonStyle.PRIMARY, `https://app.clickup.com/t/${taskId}`);
+      let viewTaskButton = await getButton(MiscEnum.VIEW_TASK_BUTTON, '', MiscEnum.VIEW_TASK_ACTION_ID, `${taskId}`, ButtonStyle.PRIMARY, viewTaskUrl(taskId)`);
       let taskSectionBlock = await getSectionBlock(`${index}) ${taskName}`, viewTaskButton);
       block.push(taskSectionBlock);
 

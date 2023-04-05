@@ -95,6 +95,7 @@ typings/
 Network Trash Folder
 Temporary Items
 .apdisk
+.gitpod.yml
 
 #RC Server and APP Testing
 RC_SERVER

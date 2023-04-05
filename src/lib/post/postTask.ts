@@ -3,10 +3,11 @@ import { IRoom, RoomType } from "@rocket.chat/apps-engine/definition/rooms";
 import { UIKitViewSubmitInteractionContext } from "@rocket.chat/apps-engine/definition/uikit";
 import { IUIKitViewSubmitIncomingInteraction } from "@rocket.chat/apps-engine/definition/uikit/UIKitIncomingInteractionTypes";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
-import { getAccessTokenForUser, get_clickup_uid } from "../../storage/users";
+import { getAccessTokenForUser, retrieveUserByRocketChatUserIdAsync } from "../../storage/users";
 import { ModalsEnum } from "../../enums/Modals";
 import { HttpStatusCode } from "@rocket.chat/apps-engine/definition/accessors";
 import { sendDirectMessage } from "../message";
+import { postTaskUrl } from "../const";
 
 export async function postTask({ context, data, room, read, persistence, modify, http }: { context: UIKitViewSubmitInteractionContext; data: IUIKitViewSubmitIncomingInteraction; room: IRoom; read: IRead; persistence: IPersistence; modify: IModify; http: IHttp }) {
   const state = data.view.state;
@@ -27,13 +28,15 @@ export async function postTask({ context, data, room, read, persistence, modify,
   if (rcassignees !== undefined) {
     const rcassigneeslist = `${rcassignees}`.split(",");
     for (let rcassignee of rcassigneeslist) {
-      let cuassignee = await get_clickup_uid(read, rcassignee);
-      if (cuassignee !== undefined) {
-        cuassignees.push(cuassignee);
-        authorized.push(rcassignee);
-      } else {
-        unauthorized.push(rcassignee);
-      }
+        const RCUser = await read.getUserReader().getByUsername(rcassignee)
+        let cuassignee = await retrieveUserByRocketChatUserIdAsync(read, RCUser.id);
+        if(cuassignee!==undefined) {
+            cuassignees.push(cuassignee!.clickUpUserId);
+            authorized.push(rcassignee);}
+        else {
+            unauthorized.push(rcassignee);
+        }
+        }
     }
   }
   const headers = {
@@ -54,19 +57,8 @@ export async function postTask({ context, data, room, read, persistence, modify,
     if (room) {
       textSender.setRoom(room);
     }
-    if (rcassignees !== undefined) {
-      const rcassigneeslist = `${rcassignees}`.split(",");
-      for (let pendingassignee of unauthorized) {
-        const text = `Hello, ${pendingassignee}!\n` + `You have been added as an assignee to the task: [${taskName}](${response.data.url}) by ${user.username}\n` + `It seems you've not yet authorized your ClickUp account on Rocket.Chat.\n` + `To do so, type  \`/clickup-app auth\`\n`;
-        const rcuser = await read.getUserReader().getByUsername(pendingassignee);
-        await sendDirectMessage(read, modify, rcuser, text, persistence);
-      }
-
-      for (let addedassignee of authorized) {
-        const text = `Hello, ${addedassignee}!\n` + `You have been added as an assignee to the task: [${taskName}](${response.data.url}) by ${user.username}`;
-        const rcuser = await read.getUserReader().getByUsername(addedassignee);
-        await sendDirectMessage(read, modify, rcuser, text, persistence);
-      }
+    const url = postTaskUrl(list_id!)
+    const response = await http.post(url, { headers , data: body});
 
       if (roomneeded === "true") {
         const roombuilder = modify

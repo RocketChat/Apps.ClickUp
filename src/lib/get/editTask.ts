@@ -6,24 +6,44 @@ import { IUIKitBaseIncomingInteraction, IUIKitViewSubmitIncomingInteraction } fr
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { getAccessTokenForUser } from "../../storage/users";
 import { editTaskModal } from "../../modals/editTaskModal";
-import { HttpStatusCode } from "@rocket.chat/apps-engine/definition/accessors";
+import { HttpStatusCode } from '@rocket.chat/apps-engine/definition/accessors';
+import { getTaskUrl } from "../const";
 
-export async function editTask({ context, data, room, read, persistence, modify, http, slashcommandcontext }: { context: UIKitBlockInteractionContext; data: IUIKitBaseIncomingInteraction; room: IRoom; read: IRead; persistence: IPersistence; modify: IModify; http: IHttp; slashcommandcontext?: SlashCommandContext }) {
-  const user: IUser = context.getInteractionData().user;
-  const token = await getAccessTokenForUser(read, user);
-  const task_id = context.getInteractionData().value;
-  const triggerId = context.getInteractionData().triggerId;
-  const headers = {
-    Authorization: `${token?.token}`,
-  };
-  const response = await http.get(`https://api.clickup.com/api/v2/task/${task_id}/`, { headers });
-
-  if (response.statusCode == HttpStatusCode.OK) {
-    if (triggerId) {
-      const modal = await editTaskModal({ modify, read, persistence, http, slashcommandcontext, data: response.data });
-      await modify.getUiController().openSurfaceView(modal, { triggerId }, user);
-    } else {
-      this.app.getLogger().error("Invalid Trigger ID");
+export async function editTask({
+    context,
+    data,
+    room,
+    read,
+    persistence,
+    modify,
+    http,
+    slashcommandcontext
+}: {
+    context: UIKitBlockInteractionContext,
+    data: IUIKitBaseIncomingInteraction,
+    room: IRoom;
+    read: IRead;
+    persistence: IPersistence;
+    modify: IModify;
+    http: IHttp;
+    slashcommandcontext?:SlashCommandContext;
+}) {
+    const user: IUser = context.getInteractionData().user;
+    const token = await getAccessTokenForUser(read, user);
+    const task_id = context.getInteractionData().value;
+    const triggerId = context.getInteractionData().triggerId;
+    const headers = {
+        Authorization: `${token?.token}`,
+    };
+    const url = getTaskUrl(task_id!);
+    const response = await http.get(url, { headers });
+    if(response.statusCode==HttpStatusCode.OK) {
+        if(triggerId){
+        const modal = await editTaskModal({modify,read,persistence,http,slashcommandcontext,data:response.data});
+        await modify.getUiController().openModalView(modal,{triggerId},user);
+        }else{
+            this.app.getLogger().error("Invalid Trigger ID");
+        }
     }
   } else {
     const textSender = await modify.getCreator().startMessage().setText(`❗️ Unable to edit task! \n Error ${response.data.err}`);

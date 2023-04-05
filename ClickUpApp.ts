@@ -5,16 +5,18 @@ import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { isUserHighHierarchy, sendDirectMessage } from './src/lib/message';
 import { IAuthData, IOAuth2Client, IOAuth2ClientOptions } from '@rocket.chat/apps-engine/definition/oauth2/IOAuth2';
 import { createOAuth2Client } from '@rocket.chat/apps-engine/definition/oauth2/OAuth2';
-import { connect_user_to_clickup_uid } from './src/storage/users';
+import { persistUserAsync } from './src/storage/users';
+import { createSectionBlock } from './src/lib/blocks';
 import { ClickUp as ClickUpCommand } from './src/slashcommands/clickUp';
 import { IUIKitResponse, UIKitBlockInteractionContext, UIKitViewSubmitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
 import { ExecuteBlockActionHandler } from './src/handlers/ExecuteBlockActionHandler';
 import { ExecuteViewSubmitHandler } from './src/handlers/ExecuteViewSubmitHandler';
 import { HttpStatusCode } from '@rocket.chat/apps-engine/definition/accessors';
 import { ApiSecurity, ApiVisibility } from '@rocket.chat/apps-engine/definition/api';
-import { clickupWebhooks } from './src/endpoints/incoming';
-import { getSectionBlock } from './src/helpers/blockBuilder';
+import { clickupWebhooks} from './src/endpoints/incoming'
+import { getProfileUrl } from './src/lib/const';
 import { Block } from '@rocket.chat/ui-kit';
+
 
 export class ClickUpApp extends App {
   public botUsername: string;
@@ -45,10 +47,10 @@ export class ClickUpApp extends App {
         await connect_user_to_clickup_uid(read, persistence, userData.data.user.id, user.id);
       }
     }
-
     const text = `The authentication process has succeeded! :tada:\n` + `If you are a workspace admin, retrieve it using ` + `\`/clickup-app get-workspaces\` slash command and ` + `save it for managing its members and tasks.\n` + `If you are just a member of a workspace, you will be notified` + `once your admin assigns you a task.`;
     const block: Block[] = [];
     let sectionBlock = await getSectionBlock(text);
+
 
     block.push(sectionBlock);
 

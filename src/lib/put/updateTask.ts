@@ -11,6 +11,7 @@ import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { getAccessTokenForUser } from "../../storage/users";
 import { ModalsEnum } from "../../enums/Modals";
 import { HttpStatusCode } from '@rocket.chat/apps-engine/definition/accessors';
+import { getTaskUrl } from "../const";
 
 export async function updateTask({
     context,
@@ -46,7 +47,8 @@ export async function updateTask({
         'due_date':`${taskdueDate}`,
         'start_date': `${taskstartDate}`,
     }
-    const response = await http.put(`https://api.clickup.com/api/v2/task/${task_id}/`,{ headers , data: body});
+    const url = getTaskUrl(task_id!);
+    const response = await http.put(url, { headers , data: body});
     
     if(response.statusCode==HttpStatusCode.OK) {
         const textSender = await modify
