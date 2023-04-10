@@ -41,8 +41,7 @@ export async function deleteList({
             textSender.setRoom(room);
         }
     await modify.getCreator().finish(textSender);
-    }
-    await modify.getCreator().finish(textSender);
+    
   } else {
     const textSender = await modify.getCreator().startMessage().setText(`❗️ Unable to delete list! \n Error ${response.data.err}`);
     if (room) {

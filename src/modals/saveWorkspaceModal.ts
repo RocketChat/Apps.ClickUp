@@ -9,18 +9,15 @@ export async function saveWorkspaceModal({ modify, read, persistence, http, slas
   const viewId = ModalsEnum.SAVE_WORKSPACE;
   const block: Block[] = [];
   const membercount = data.members.length;
-
   let textSectionBlock = await getSectionBlock(`Do not change the input boxes, just enter username after colon.`);
   block.push(textSectionBlock);
-
-  for (const [index, member] of data.members) {
+  for (const [index, member] of data.members.entries()) {
     let userInputBox = await getInputBox(`Enter Rocket.Chat username of ClickUp user: \n` + `${member.user.username} (${member.user.email})`, '', ModalsEnum.MEMBER_USERNAME_BLOCK + `#${index}`, ModalsEnum.MEMBER_USERNAME_INPUT + `#${index}`, `${member.user.id}:`);
     block.push(userInputBox);
   }
 
   let closeButton = await getButton('Close', '', '');
   let submitButton = await getButton(ModalsEnum.SAVE_WORKSPACE_SUBMIT_BUTTON_LABEL, '', '');
-  
   return {
     id: viewId,
     type: UIKitSurfaceType.MODAL,

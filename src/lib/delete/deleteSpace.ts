@@ -41,9 +41,7 @@ export async function deleteSpace({
             textSender.setRoom(room);
         }
     await modify.getCreator().finish(textSender);
-    }
-    await modify.getCreator().finish(textSender);
-  } else {
+    } else {
     const textSender = await modify.getCreator().startMessage().setText(`❗️ Unable to delete space! \n Error ${response.data.err}`);
     if (room) {
       textSender.setRoom(room);

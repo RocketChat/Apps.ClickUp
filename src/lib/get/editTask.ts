@@ -40,11 +40,11 @@ export async function editTask({
     if(response.statusCode==HttpStatusCode.OK) {
         if(triggerId){
         const modal = await editTaskModal({modify,read,persistence,http,slashcommandcontext,data:response.data});
-        await modify.getUiController().openModalView(modal,{triggerId},user);
+        await modify.getUiController().openSurfaceView(modal,{triggerId},user);
         }else{
             this.app.getLogger().error("Invalid Trigger ID");
         }
-    }
+    
   } else {
     const textSender = await modify.getCreator().startMessage().setText(`❗️ Unable to edit task! \n Error ${response.data.err}`);
     if (room) {

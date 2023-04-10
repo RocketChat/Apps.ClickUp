@@ -42,9 +42,7 @@ export async function shareTask({
             textSender.setRoom(room);
         }
     await modify.getCreator().finish(textSender);
-    }
-    await modify.getCreator().finish(textSender);
-  } else {
+    }else {
     const textSender = await modify.getCreator().startMessage().setText(`❗️ Unable to share task! \n Error ${response.data.err}`);
     if (room) {
       textSender.setRoom(room);

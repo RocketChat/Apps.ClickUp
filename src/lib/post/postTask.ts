@@ -24,21 +24,20 @@ export async function postTask({ context, data, room, read, persistence, modify,
   const cuassignees = [] as string[];
   const authorized = [] as string[];
   const unauthorized = [] as string[];
-
   if (rcassignees !== undefined) {
     const rcassigneeslist = `${rcassignees}`.split(",");
     for (let rcassignee of rcassigneeslist) {
-        const RCUser = await read.getUserReader().getByUsername(rcassignee)
-        let cuassignee = await retrieveUserByRocketChatUserIdAsync(read, RCUser.id);
-        if(cuassignee!==undefined) {
-            cuassignees.push(cuassignee!.clickUpUserId);
-            authorized.push(rcassignee);}
-        else {
-            unauthorized.push(rcassignee);
-        }
-        }
+      const RCUser = await read.getUserReader().getByUsername(rcassignee);
+      let cuassignee = await retrieveUserByRocketChatUserIdAsync(read, RCUser.id);
+      if (cuassignee !== undefined) {
+        cuassignees.push(cuassignee!.clickUpUserId);
+        authorized.push(rcassignee);
+      } else {
+        unauthorized.push(rcassignee);
+      }
     }
   }
+
   const headers = {
     Authorization: `${token?.token}`,
   };
@@ -50,15 +49,28 @@ export async function postTask({ context, data, room, read, persistence, modify,
     assignees: cuassignees,
     priority: `${taskPriority}`,
   };
-  const response = await http.post(`https://api.clickup.com/api/v2/list/${list_id}/task`, { headers, data: body });
+
+  const url = postTaskUrl(list_id!);
+  const response = await http.post(url, { headers, data: body });
 
   if (response.statusCode == HttpStatusCode.OK) {
     const textSender = await modify.getCreator().startMessage().setText(`✅️ Task created successfully! \n You may access it at [${taskName}](${response.data.url})`);
     if (room) {
       textSender.setRoom(room);
     }
-    const url = postTaskUrl(list_id!)
-    const response = await http.post(url, { headers , data: body});
+    if (rcassignees !== undefined) {
+      const rcassigneeslist = `${rcassignees}`.split(",");
+      for (let pendingassignee of unauthorized) {
+        const text = `Hello, ${pendingassignee}!\n` + `You have been added as an assignee to the task: [${taskName}](${response.data.url}) by ${user.username}\n` + `It seems you've not yet authorized your ClickUp account on Rocket.Chat.\n` + `To do so, type  \`/clickup-app auth\`\n`;
+        const rcuser = await read.getUserReader().getByUsername(pendingassignee);
+        await sendDirectMessage(read, modify, rcuser, text, persistence);
+      }
+
+      for (let addedassignee of authorized) {
+        const text = `Hello, ${addedassignee}!\n` + `You have been added as an assignee to the task: [${taskName}](${response.data.url}) by ${user.username}`;
+        const rcuser = await read.getUserReader().getByUsername(addedassignee);
+        await sendDirectMessage(read, modify, rcuser, text, persistence);
+      }
 
       if (roomneeded === "true") {
         const roombuilder = modify

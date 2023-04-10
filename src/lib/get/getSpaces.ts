@@ -21,7 +21,7 @@ export async function getSpaces({ context, data, room, read, persistence, modify
      const response = await http.get(url, { headers });   
     if(response.statusCode==HttpStatusCode.OK) {
         const modal = await getSpacesModal({modify,read,persistence,http,data:response,wid:workspace_id});
-        await modify.getUiController().openModalView(modal,{triggerId},user);
+        await modify.getUiController().openSurfaceView(modal,{triggerId},user);
     }
   } else {
     this.app.getLogger().error("Invalid Trigger ID");

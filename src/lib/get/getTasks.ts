@@ -28,7 +28,6 @@ export async function getTasks({ context, data, room, read, persistence, modify,
   const headers = {
     Authorization: `${token?.token}`,
   };
-
   const url = getTasksOfUrl(list_id!, archived!, subtasks!);
   const response = await http.get(url, { headers });
   if (response.statusCode == HttpStatusCode.OK) {

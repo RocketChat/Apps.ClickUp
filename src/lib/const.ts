@@ -1,4 +1,4 @@
-const ApiBaseUrl: string = 'https://api.clickup.com';
+const ApiBaseUrl: string = 'https://api.clickup.com/api';
 
 const ApiVersion = {
     V2: 'v2',
@@ -50,7 +50,7 @@ export const getSpacesOfUrl = (workspaceId: string) => {
 };
 
 export const getFoldersOfUrl = (spaceId: string) => {
-    return `${ApiBaseUrl}/${ApiVersion.V2}/${ApiEndpoint.Space}/${ApiEndpoint.FoldersOf(spaceId)}`;
+    return `${ApiBaseUrl}/${ApiVersion.V2}/space/${ApiEndpoint.FoldersOf(spaceId)}`;
 };
 
 export const getListsOfUrl = (folderId: string) => {
@@ -61,7 +61,7 @@ export const getListsOfSpaceUrl = (spaceId: string) => {
     return `${ApiBaseUrl}/${ApiVersion.V2}/${ApiEndpoint.Space}/${ApiEndpoint.ListsOfSpace(spaceId)}`;
 };
 
-export const getTasksOfUrl = (listId: string, archived: string, subtasks: string) => {
+export const    getTasksOfUrl = (listId: string, archived: string, subtasks: string) => {
     return `${ApiBaseUrl}/${ApiVersion.V2}/${ApiEndpoint.List}/${ApiEndpoint.TasksOf(listId, archived, subtasks)}`;
 };
 
@@ -90,7 +90,7 @@ export const getWebhookApiUrl = (webhookId: string) => {
 };
 
 export const postTaskUrl = (listId: string) => {
-    return `${ApiBaseUrl}/${ApiVersion.V2}/${listId}/${ApiEndpoint.Task}`;
+    return `${ApiBaseUrl}/${ApiVersion.V2}/${ApiEndpoint.List}/${listId}/${ApiEndpoint.Task}`;
 };
 
 export const postWebhookUrl = (workspaceId: string) => {
