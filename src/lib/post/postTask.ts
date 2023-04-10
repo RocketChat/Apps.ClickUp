@@ -3,10 +3,11 @@ import { IRoom, RoomType } from "@rocket.chat/apps-engine/definition/rooms";
 import { UIKitViewSubmitInteractionContext } from "@rocket.chat/apps-engine/definition/uikit";
 import { IUIKitViewSubmitIncomingInteraction } from "@rocket.chat/apps-engine/definition/uikit/UIKitIncomingInteractionTypes";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
-import { getAccessTokenForUser, get_clickup_uid } from "../../storage/users";
+import { getAccessTokenForUser, retrieveUserByRocketChatUserIdAsync } from "../../storage/users";
 import { ModalsEnum } from "../../enums/Modals";
 import { HttpStatusCode } from "@rocket.chat/apps-engine/definition/accessors";
 import { sendDirectMessage } from "../message";
+import { postTaskUrl } from "../const";
 
 export async function postTask({ context, data, room, read, persistence, modify, http }: { context: UIKitViewSubmitInteractionContext; data: IUIKitViewSubmitIncomingInteraction; room: IRoom; read: IRead; persistence: IPersistence; modify: IModify; http: IHttp }) {
   const state = data.view.state;
@@ -23,19 +24,20 @@ export async function postTask({ context, data, room, read, persistence, modify,
   const cuassignees = [] as string[];
   const authorized = [] as string[];
   const unauthorized = [] as string[];
-
   if (rcassignees !== undefined) {
     const rcassigneeslist = `${rcassignees}`.split(",");
     for (let rcassignee of rcassigneeslist) {
-      let cuassignee = await get_clickup_uid(read, rcassignee);
+      const RCUser = await read.getUserReader().getByUsername(rcassignee);
+      let cuassignee = await retrieveUserByRocketChatUserIdAsync(read, RCUser.id);
       if (cuassignee !== undefined) {
-        cuassignees.push(cuassignee);
+        cuassignees.push(cuassignee!.clickUpUserId);
         authorized.push(rcassignee);
       } else {
         unauthorized.push(rcassignee);
       }
     }
   }
+
   const headers = {
     Authorization: `${token?.token}`,
   };
@@ -47,7 +49,9 @@ export async function postTask({ context, data, room, read, persistence, modify,
     assignees: cuassignees,
     priority: `${taskPriority}`,
   };
-  const response = await http.post(`https://api.clickup.com/api/v2/list/${list_id}/task`, { headers, data: body });
+
+  const url = postTaskUrl(list_id!);
+  const response = await http.post(url, { headers, data: body });
 
   if (response.statusCode == HttpStatusCode.OK) {
     const textSender = await modify.getCreator().startMessage().setText(`✅️ Task created successfully! \n You may access it at [${taskName}](${response.data.url})`);

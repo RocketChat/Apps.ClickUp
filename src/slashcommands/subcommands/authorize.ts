@@ -11,8 +11,8 @@ export async function authorize(app: ClickUpApp, read: IRead, modify: IModify, u
   const block: Block[] = [];
 
   let authButton = await getButton('Authorize', '', '', '', ButtonStyle.PRIMARY, url.toString());
-  let sectionBlock = await getSectionBlock('Please click the button below to authorize access to your ClickUp account 👇', authButton);
-  block.push(sectionBlock);
+  let textsectionBlock = await getSectionBlock('Please click the button below to authorize access to your ClickUp account 👇',authButton);
+  block.push(textsectionBlock);
 
   await sendDirectMessage(read, modify, user, '', persistence, block);
 }

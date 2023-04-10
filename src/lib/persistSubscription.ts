@@ -9,6 +9,7 @@ import { getWebhookUrl } from "../helpers/getWebhookURL";
 import { Subscription } from "../storage/subscription";
 import { getInteractionRoomData } from "../storage/roomInteraction";
 import { ClickUpApp } from "../../ClickUpApp";
+import { postWebhookUrl } from "./const";
 
 export async function persistSubscription({ app, context, data, room, read, persistence, modify, http }: { app: ClickUpApp; context: UIKitViewSubmitInteractionContext; data: IUIKitViewSubmitIncomingInteraction; room: IRoom; read: IRead; persistence: IPersistence; modify: IModify; http: IHttp }) {
   const state = data.view.state;
@@ -29,8 +30,8 @@ export async function persistSubscription({ app, context, data, room, read, pers
     events: `*`,
   };
 
-  const api_response = await http.post(`https://api.clickup.com/api/v2/team/${workspace_id}/webhook`, { headers, data: body });
-
+  const api_url = postWebhookUrl(workspace_id);
+  const api_response = await http.post(api_url, { headers, data: body });
   let subscriptionStorage = new Subscription(persistence, read.getPersistenceReader());
   let hookId = "";
   let subscriptions = await subscriptionStorage.getSubscriptionsByTask(task_id, user.id);

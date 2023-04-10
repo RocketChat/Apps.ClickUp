@@ -7,6 +7,7 @@ import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { getAccessTokenForUser } from "../../storage/users";
 import { HttpStatusCode } from "@rocket.chat/apps-engine/definition/accessors";
 import { saveWorkspaceModal } from "../../modals/saveWorkspaceModal";
+import { getWorkspacesUrl } from "../const";
 
 export async function saveWorkspace({ context, data, room, read, persistence, modify, http, slashcommandcontext }: { context: UIKitBlockInteractionContext; data: IUIKitBaseIncomingInteraction; room: IRoom; read: IRead; persistence: IPersistence; modify: IModify; http: IHttp; slashcommandcontext?: SlashCommandContext }) {
   const user: IUser = context.getInteractionData().user;
@@ -16,7 +17,8 @@ export async function saveWorkspace({ context, data, room, read, persistence, mo
   const headers = {
     Authorization: `${token?.token}`,
   };
-  const response = await http.get(`https://api.clickup.com/api/v2/team`, { headers });
+  const url = getWorkspacesUrl();
+  const response = await http.get(url, { headers });
   const workspace = response.data.teams.find((x) => x.id === `${workspace_id}`);
   if (response.statusCode == HttpStatusCode.OK) {
     if (triggerId) {
