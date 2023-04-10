@@ -112,60 +112,51 @@ export const retrieveUserByClickUpUserIdAsync = async (
 
 
 export async function create(read: IRead, persistence: IPersistence, user: IUser): Promise<void> {
-    const users = await getAllUsers(read);
+  const users = await getAllUsers(read);
 
-    if (!users) {
-        await persistence.createWithAssociation([user], assoc);
-        return;
-    }
+  if (!users) {
+    await persistence.createWithAssociation([user], assoc);
+    return;
+  }
 
-    if (!isUserPresent(users, user)) {
-        users.push(user);
-        await persistence.updateByAssociation(assoc, users);
-    }
+  if (!isUserPresent(users, user)) {
+    users.push(user);
+    await persistence.updateByAssociation(assoc, users);
+  }
 }
 
 export async function remove(read: IRead, persistence: IPersistence, user: IUser): Promise<void> {
-    const users = await getAllUsers(read);
+  const users = await getAllUsers(read);
 
-    if (!users || !isUserPresent(users, user)) {
-        // @NOTE do nothing
-        return;
-    }
+  if (!users || !isUserPresent(users, user)) {
+    // @NOTE do nothing
+    return;
+  }
 
-    const idx = users.findIndex((u: IUser) => u.id === user.id);
-    users.splice(idx, 1);
-    await persistence.updateByAssociation(assoc, users);
+  const idx = users.findIndex((u: IUser) => u.id === user.id);
+  users.splice(idx, 1);
+  await persistence.updateByAssociation(assoc, users);
 }
 
 export async function getAllUsers(read: IRead): Promise<IUser[]> {
-    const data = await read.getPersistenceReader().readByAssociation(assoc);
-    return (data.length ? data[0] as IUser[] : []);
+  const data = await read.getPersistenceReader().readByAssociation(assoc);
+  return data.length ? (data[0] as IUser[]) : [];
 }
 
 function isUserPresent(users: IUser[], targetUser: IUser): boolean {
-    return users.some((user) => user.id === targetUser.id);
+  return users.some((user) => user.id === targetUser.id);
 }
 
 /**
-  * This function needed to be copied from the apps engine due to difficulties trying to
-  * get access to the auth client from inside a job processor.
-  * @NOTE It relies on hardcoded information (config alias's suffix) to work and it might break if
-  * the value changes
-  */
+ * This function needed to be copied from the apps engine due to difficulties trying to
+ * get access to the auth client from inside a job processor.
+ * @NOTE It relies on hardcoded information (config alias's suffix) to work and it might break if
+ * the value changes
+ */
 export async function getAccessTokenForUser(read: IRead, user: IUser): Promise<IAuthData | undefined> {
-        const associations = [
-            new RocketChatAssociationRecord(
-                RocketChatAssociationModel.USER,
-                user.id,
-            ),
-            new RocketChatAssociationRecord(
-                RocketChatAssociationModel.MISC,
-                `clickup-app-oauth-connection`,
-            ),
-        ];
+  const associations = [new RocketChatAssociationRecord(RocketChatAssociationModel.USER, user.id), new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `clickup-app-oauth-connection`)];
 
-        const [ result ] = await read.getPersistenceReader().readByAssociations(associations) as unknown as Array<IAuthData | undefined>;
+  const [result] = (await read.getPersistenceReader().readByAssociations(associations)) as unknown as Array<IAuthData | undefined>;
 
-        return result;
+  return result;
 }

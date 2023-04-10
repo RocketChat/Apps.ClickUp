@@ -100,3 +100,6 @@ Temporary Items
 #RC Server and APP Testing
 RC_SERVER
 TESTING_APPS
+
+#package-lock.json
+package-lock.json

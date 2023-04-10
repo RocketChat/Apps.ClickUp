@@ -1,59 +1,44 @@
-import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
-import { ButtonStyle, TextObjectType } from '@rocket.chat/apps-engine/definition/uikit/blocks';
-import { IUIKitModalViewParam } from '@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder';
+import { IHttp, IModify, IPersistence, IRead, IUIKitSurfaceViewParam } from '@rocket.chat/apps-engine/definition/accessors';
+import { ButtonStyle } from '@rocket.chat/apps-engine/definition/uikit/blocks';
 import { ModalsEnum } from '../enums/Modals';
 import { SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashcommands';
-import { UIKitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
+import { UIKitInteractionContext, UIKitSurfaceType } from '@rocket.chat/apps-engine/definition/uikit';
 import { MiscEnum } from '../enums/Misc';
+import { Block } from '@rocket.chat/ui-kit';
+import { getActionsBlock, getButton, getContextBlock, getSectionBlock } from '../helpers/blockBuilder';
 
-export async function getSpacesModal({ modify, read, persistence, http, slashcommandcontext, uikitcontext, data , wid}: { modify: IModify, read: IRead, persistence: IPersistence, http: IHttp ,slashcommandcontext?: SlashCommandContext, uikitcontext?: UIKitInteractionContext, data?: any , wid?:string}): Promise<IUIKitModalViewParam> {
-    const viewId = ModalsEnum.GET_SPACES;
-    const block = modify.getCreator().getBlockBuilder();
-    const workspace_id = wid;
-    let limit = data.data.spaces.length;
-    data.data.spaces.forEach(async (space) => {
-        if (limit == 0) return;
-        if (limit--) {
-            const privacy = space.private==true?"Private":"Public";
-                block.addSectionBlock({
-                    text: block.newPlainTextObject(`${space.name}`),
-                });
-                block.addContextBlock({ elements: [ block.newPlainTextObject(`ID: `+`${space.id}` +` | Privacy: `+`${privacy}`)]});
-                block.addActionsBlock({
-                    blockId: MiscEnum.SPACE_ACTIONS_BLOCK,
-                    elements: [
-                        block.newButtonElement({
-                            actionId: MiscEnum.GET_FOLDERS_ACTION_ID,
-                            text: block.newPlainTextObject(MiscEnum.GET_FOLDERS_BUTTON),
-                            value: `${workspace_id},${space.id}`,
-                            style: ButtonStyle.PRIMARY,
-                        }),
-                        block.newButtonElement({
-                            actionId: MiscEnum.DELETE_SPACE_ACTION_ID,
-                            text: block.newPlainTextObject(MiscEnum.DELETE_SPACE_BUTTON),
-                            value: `${space.id}`,
-                            style: ButtonStyle.DANGER,
-                        }),
-                    ],
-                });
-            
-        }
-    });
-   
+export async function getSpacesModal({ modify, read, persistence, http, slashcommandcontext, uikitcontext, data, wid }: { modify: IModify; read: IRead; persistence: IPersistence; http: IHttp; slashcommandcontext?: SlashCommandContext; uikitcontext?: UIKitInteractionContext; data?: any; wid?: string }): Promise<IUIKitSurfaceViewParam> {
+  const viewId = ModalsEnum.GET_SPACES;
+  const block: Block[] = [];
+  const workspace_id = wid;
+  let limit = data.data.spaces.length;
+  for (const space of data.data.spaces) {
+    if (limit == 0) break;
+    if (limit--) {
+      const privacy = space.private == true ? 'Private' : 'Public';
 
+      let spaceNameSectionBox = await getSectionBlock(`${space.name}`);
 
-    return {
-        id: viewId,
-        title: {
-            type: TextObjectType.PLAINTEXT,
-            text: ModalsEnum.GET_SPACES_MODAL_NAME,
-        },
-        close: block.newButtonElement({
-            text: {
-                type: TextObjectType.PLAINTEXT,
-                text: 'Close',
-            },
-        }),
-        blocks: block.getBlocks(),
-    };
+      let spaceDetailsContextBox = await getContextBlock(`ID: ` + `${space.id}` + ` | Privacy: ` + `${privacy}`);
+
+      let getFoldersButton = await getButton(MiscEnum.GET_FOLDERS_BUTTON, MiscEnum.SPACE_ACTIONS_BLOCK, MiscEnum.GET_FOLDERS_ACTION_ID, `${workspace_id},${space.id}`, ButtonStyle.PRIMARY);
+      let deleteSpaceButton = await getButton(MiscEnum.DELETE_SPACE_BUTTON, MiscEnum.SPACE_ACTIONS_BLOCK, MiscEnum.DELETE_SPACE_ACTION_ID, `${space.id}`, ButtonStyle.DANGER);
+      let spaceActionBlock = await getActionsBlock(MiscEnum.SPACE_ACTIONS_BLOCK, [getFoldersButton, deleteSpaceButton]);
+
+      block.push(spaceNameSectionBox, spaceDetailsContextBox, spaceActionBlock);
+    }
+  }
+
+  let closeButton = await getButton('Close', '', '');
+
+  return {
+    id: viewId,
+    type: UIKitSurfaceType.MODAL,
+    title: {
+      type: 'plain_text',
+      text: ModalsEnum.GET_SPACES_MODAL_NAME,
+    },
+    close: closeButton,
+    blocks: block,
+  };
 }

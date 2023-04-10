@@ -1,17 +1,7 @@
-import {
-    IHttp,
-    IMessageBuilder,
-    IModify,
-    IModifyCreator,
-    IPersistence,
-    IRead,
-} from "@rocket.chat/apps-engine/definition/accessors";
+import { IHttp, IMessageBuilder, IModify, IModifyCreator, IPersistence, IRead } from "@rocket.chat/apps-engine/definition/accessors";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
-import { IUIKitResponse, TextObjectType, UIKitViewSubmitInteractionContext , ButtonStyle, UIKitBlockInteractionContext} from '@rocket.chat/apps-engine/definition/uikit';
-import {
-    ISlashCommand,
-    SlashCommandContext,
-} from "@rocket.chat/apps-engine/definition/slashcommands";
+import { IUIKitResponse, TextObjectType, UIKitViewSubmitInteractionContext, ButtonStyle, UIKitBlockInteractionContext } from "@rocket.chat/apps-engine/definition/uikit";
+import { ISlashCommand, SlashCommandContext } from "@rocket.chat/apps-engine/definition/slashcommands";
 import { IUIKitBaseIncomingInteraction, IUIKitViewSubmitIncomingInteraction } from "@rocket.chat/apps-engine/definition/uikit/UIKitIncomingInteractionTypes";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { getAccessTokenForUser } from "../../storage/users";
@@ -50,19 +40,16 @@ export async function editTask({
     if(response.statusCode==HttpStatusCode.OK) {
         if(triggerId){
         const modal = await editTaskModal({modify,read,persistence,http,slashcommandcontext,data:response.data});
-        await modify.getUiController().openModalView(modal,{triggerId},user);
+        await modify.getUiController().openSurfaceView(modal,{triggerId},user);
         }else{
             this.app.getLogger().error("Invalid Trigger ID");
         }
+    
+  } else {
+    const textSender = await modify.getCreator().startMessage().setText(`❗️ Unable to edit task! \n Error ${response.data.err}`);
+    if (room) {
+      textSender.setRoom(room);
     }
-    else {
-        const textSender = await modify
-        .getCreator()
-        .startMessage()
-        .setText(`❗️ Unable to edit task! \n Error ${response.data.err}`);
-        if (room) {
-            textSender.setRoom(room);
-        }
     await modify.getCreator().finish(textSender);
-    }
+  }
 }

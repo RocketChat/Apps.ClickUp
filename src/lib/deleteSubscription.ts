@@ -1,16 +1,10 @@
-import {
-    IHttp,
-    IModify,
-    IPersistence,
-    IRead,
-} from "@rocket.chat/apps-engine/definition/accessors";
+import { IHttp, IModify, IPersistence, IRead } from "@rocket.chat/apps-engine/definition/accessors";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
-import {  UIKitBlockInteractionContext} from '@rocket.chat/apps-engine/definition/uikit';
+import { UIKitBlockInteractionContext } from "@rocket.chat/apps-engine/definition/uikit";
 import { IUIKitBaseIncomingInteraction } from "@rocket.chat/apps-engine/definition/uikit/UIKitIncomingInteractionTypes";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { getAccessTokenForUser } from "../storage/users";
-
-import { HttpStatusCode } from '@rocket.chat/apps-engine/definition/accessors';
+import { HttpStatusCode } from "@rocket.chat/apps-engine/definition/accessors";
 import { storeInteractionRoomData, getInteractionRoomData } from "../storage/roomInteraction";
 import { Subscription } from "../storage/subscription";
 import { sendNotification } from "./message";
@@ -54,24 +48,17 @@ export async function deleteSubscription({
     const url = getWebhookApiUrl(webhook_id!);
     const response = await http.del(url, { headers});
 
-    if(response.statusCode==HttpStatusCode.OK) {
-        const textSender = await modify
-        .getCreator()
-        .startMessage()
-        .setText(`✅️ Unsubscribed successfully!`);
-        if (room) {
-            textSender.setRoom(room);
-        }
-    await modify.getCreator().finish(textSender);
+  if (response.statusCode == HttpStatusCode.OK) {
+    const textSender = await modify.getCreator().startMessage().setText(`✅️ Unsubscribed successfully!`);
+    if (room) {
+      textSender.setRoom(room);
     }
-    else {
-        const textSender = await modify
-        .getCreator()
-        .startMessage()
-        .setText(`❗️ Unable to unsubscribe! \n Error ${response.data.err}`);
-        if (room) {
-            textSender.setRoom(room);
-        }
     await modify.getCreator().finish(textSender);
+  } else {
+    const textSender = await modify.getCreator().startMessage().setText(`❗️ Unable to unsubscribe! \n Error ${response.data.err}`);
+    if (room) {
+      textSender.setRoom(room);
     }
+    await modify.getCreator().finish(textSender);
+  }
 }

@@ -1,114 +1,53 @@
-import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
-import { TextObjectType } from '@rocket.chat/apps-engine/definition/uikit/blocks';
-import { IUIKitModalViewParam } from '@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder';
+import { IHttp, IModify, IPersistence, IRead, IUIKitSurfaceViewParam } from '@rocket.chat/apps-engine/definition/accessors';
 import { ModalsEnum } from '../enums/Modals';
 import { SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashcommands';
-import { UIKitInteractionContext, BlockElementType } from '@rocket.chat/apps-engine/definition/uikit';
+import { UIKitInteractionContext, UIKitSurfaceType } from '@rocket.chat/apps-engine/definition/uikit';
+import { Block} from '@rocket.chat/ui-kit';
+import { getActionsBlock, getButton, getInputBox, getInputBoxDate, getOptions, getStaticSelectElement } from '../helpers/blockBuilder';
 
-export async function createTaskModal({ modify, read, persistence, http, slashcommandcontext, uikitcontext, data }: { modify: IModify, read: IRead, persistence: IPersistence, http: IHttp ,slashcommandcontext?: SlashCommandContext, uikitcontext?: UIKitInteractionContext, data?: string  }): Promise<IUIKitModalViewParam> {
-    const viewId = ModalsEnum.CREATE_TASK;
+export async function createTaskModal({ modify, read, persistence, http, slashcommandcontext, uikitcontext, data }: { modify: IModify; read: IRead; persistence: IPersistence; http: IHttp; slashcommandcontext?: SlashCommandContext; uikitcontext?: UIKitInteractionContext; data?: string }): Promise<IUIKitSurfaceViewParam> {
+  const viewId = ModalsEnum.CREATE_TASK;
+  const block: Block[] = [];
 
-    const block = modify.getCreator().getBlockBuilder();
+  let listIdInputBox = await getInputBox(ModalsEnum.LIST_ID_INPUT_LABEL, ModalsEnum.LIST_ID_INPUT_LABEL_DEFAULT, ModalsEnum.LIST_ID_BLOCK, ModalsEnum.LIST_ID_INPUT, data || '');
+  
+  let taskNameInputbox = await getInputBox(ModalsEnum.TASK_NAME_INPUT_LABEL, ModalsEnum.TASK_NAME_INPUT_LABEL_DEFAULT, ModalsEnum.TASK_NAME_BLOCK, ModalsEnum.TASK_NAME_INPUT);
+  
+  let option1 = await getOptions('Urgent', '1');
+  let option2 = await getOptions('High', '2');
+  let option3 = await getOptions('Normal', '3');
+  let option4 = await getOptions('Low', '4');
+  let taskPrioritySelectElement = await getStaticSelectElement(ModalsEnum.TASK_PRIORITY_PLACEHOLDER, [option1, option2, option3, option4], ModalsEnum.TASK_PRIORITY_BLOCK, ModalsEnum.TASK_PRIORITY_ACTION_ID, 'Normal');
+  let taskPriorityActionBlock = await getActionsBlock(ModalsEnum.TASK_PRIORITY_BLOCK, [taskPrioritySelectElement]);
 
-    block.addInputBlock({
-        blockId: ModalsEnum.LIST_ID_BLOCK,
-        label: { text: ModalsEnum.LIST_ID_INPUT_LABEL, type: TextObjectType.PLAINTEXT },
-        element: block.newPlainTextInputElement({
-            actionId: ModalsEnum.LIST_ID_INPUT,
-            placeholder: { text: ModalsEnum.LIST_ID_INPUT_LABEL_DEFAULT, type: TextObjectType.PLAINTEXT },
-            initialValue: data || '',
+  let taskDescriptionInputBox = await getInputBox(ModalsEnum.TASK_DESCRIPTION_INPUT_LABEL, ModalsEnum.TASK_DESCRIPTION_INPUT_LABEL_DEFAULT, ModalsEnum.TASK_DESCRIPTION_BLOCK, ModalsEnum.TASK_DESCRIPTION_INPUT);
 
-        })
-    });
-    block.addInputBlock({
-        blockId: ModalsEnum.TASK_NAME_BLOCK,
-        label: { text: ModalsEnum.TASK_NAME_INPUT_LABEL, type: TextObjectType.PLAINTEXT },
-        element: block.newPlainTextInputElement({
-            actionId: ModalsEnum.TASK_NAME_INPUT,
-            placeholder: { text: ModalsEnum.TASK_NAME_INPUT_LABEL_DEFAULT, type: TextObjectType.PLAINTEXT },
-        })
-    });
+  let taskStartDateInputBox = await getInputBoxDate(ModalsEnum.TASK_START_DATE_INPUT_LABEL, '', ModalsEnum.TASK_START_DATE_BLOCK, ModalsEnum.TASK_START_DATE_INPUT);
 
-    block.addActionsBlock({
-        blockId: ModalsEnum.TASK_PRIORITY_BLOCK,
-        elements: [
-            block.newStaticSelectElement({
-                actionId: ModalsEnum.TASK_PRIORITY_ACTION_ID,
-                placeholder: block.newPlainTextObject(ModalsEnum.TASK_PRIORITY_PLACEHOLDER),
-                options: [{ text: { type: TextObjectType.PLAINTEXT, text: 'Urgent' }, value: '1' }, { text: { type: TextObjectType.PLAINTEXT, text: 'High' }, value: '2' }, { text: { type: TextObjectType.PLAINTEXT, text: 'Normal' }, value: '3' }, { text: { type: TextObjectType.PLAINTEXT, text: 'Low' }, value: '4' }],
-                initialValue: 'Normal',
-            }),
-        ],
-    });
+  let taskDueDateInputBox = await getInputBoxDate(ModalsEnum.TASK_DUE_DATE_INPUT_LABEL, '', ModalsEnum.TASK_DUE_DATE_BLOCK, ModalsEnum.TASK_DUE_DATE_INPUT);
 
+  let taskAssigneeInputBlock = await getInputBox(ModalsEnum.TASK_ASSIGNEES_INPUT_LABEL, ModalsEnum.TASK_ASSIGNEES_INPUT_LABEL_DEFAULT, ModalsEnum.TASK_ASSIGNEES_BLOCK, ModalsEnum.TASK_ASSIGNEES_INPUT);
+  
+  let op1 = await getOptions('Yes', 'Yes');
+  let op2 = await getOptions('No', 'No');
+  let assigneeRoomSelectElement = await getStaticSelectElement(ModalsEnum.ASSIGNEE_ROOM_PLACEHOLDER, [op1, op2], ModalsEnum.ASSIGNEE_ROOM_BLOCK, ModalsEnum.ASSIGNEE_ROOM_ACTION_ID, 'No');
+  let assigneeRoomActionBlock = await getActionsBlock(ModalsEnum.ASSIGNEE_ROOM_BLOCK, [assigneeRoomSelectElement]);
+  
+  block.push(listIdInputBox,taskNameInputbox,taskPriorityActionBlock,taskDescriptionInputBox,taskStartDateInputBox,taskDueDateInputBox,taskAssigneeInputBlock,assigneeRoomActionBlock);
 
-    block.addInputBlock({
-        blockId: ModalsEnum.TASK_DESCRIPTION_BLOCK,
-        label: { text: ModalsEnum.TASK_DESCRIPTION_INPUT_LABEL, type: TextObjectType.PLAINTEXT },
-        element: block.newPlainTextInputElement({
-            actionId: ModalsEnum.TASK_DESCRIPTION_INPUT,
-            placeholder: { text: ModalsEnum.TASK_DESCRIPTION_INPUT_LABEL_DEFAULT, type: TextObjectType.PLAINTEXT },
-            multiline : true,
-        })
-    });
+  let closeButton = await getButton('Close', '', '');
 
-    block.addInputBlock({
-        blockId: ModalsEnum.TASK_START_DATE_BLOCK,
-        label: { text: ModalsEnum.TASK_START_DATE_INPUT_LABEL, type: TextObjectType.PLAINTEXT },
-        element: {
-            placeholder: { text: '', type: TextObjectType.PLAINTEXT },
-            type: 'datepicker' as BlockElementType,
-            actionId: ModalsEnum.TASK_START_DATE_INPUT,
-        },
-    });
+  let submitButton = await getButton(ModalsEnum.CREATE_TASK_SUBMIT_BUTTON_LABEL, '', ModalsEnum.CREATE_TASK);
 
-    block.addInputBlock({
-        blockId: ModalsEnum.TASK_DUE_DATE_BLOCK,
-        label: { text: ModalsEnum.TASK_DUE_DATE_INPUT_LABEL, type: TextObjectType.PLAINTEXT },
-        element: {
-            placeholder: { text: '', type: TextObjectType.PLAINTEXT },
-            type: 'datepicker' as BlockElementType,
-            actionId: ModalsEnum.TASK_DUE_DATE_INPUT,
-        },
-    });
-    
-    block.addInputBlock({
-        blockId: ModalsEnum.TASK_ASSIGNEES_BLOCK,
-        label: { text: ModalsEnum.TASK_ASSIGNEES_INPUT_LABEL, type: TextObjectType.PLAINTEXT },
-        element: block.newPlainTextInputElement({
-            actionId: ModalsEnum.TASK_ASSIGNEES_INPUT,
-            placeholder: { text: ModalsEnum.TASK_ASSIGNEES_INPUT_LABEL_DEFAULT, type: TextObjectType.PLAINTEXT },
-        })
-    });
-
-
-    block.addActionsBlock({
-        blockId: ModalsEnum.ASSIGNEE_ROOM_BLOCK,
-        elements: [
-            block.newStaticSelectElement({
-                actionId: ModalsEnum.ASSIGNEE_ROOM_ACTION_ID,
-                placeholder: block.newPlainTextObject(ModalsEnum.ASSIGNEE_ROOM_PLACEHOLDER),
-                options: [{ text: { type: TextObjectType.PLAINTEXT, text: 'Yes' }, value: 'Yes' }, { text: { type: TextObjectType.PLAINTEXT, text: 'No' }, value: 'No' }],
-                initialValue: 'No',
-            }),
-        ],
-    });
-
-    return {
-        id: viewId,
-        title: {
-            type: TextObjectType.PLAINTEXT,
-            text: ModalsEnum.CREATE_TASK_MODAL_NAME,
-        },
-        close: block.newButtonElement({
-            text: {
-                type: TextObjectType.PLAINTEXT,
-                text: 'Close',
-            },
-        }),
-        submit: block.newButtonElement({
-            text: block.newPlainTextObject(ModalsEnum.CREATE_TASK_SUBMIT_BUTTON_LABEL),
-        }),
-        blocks: block.getBlocks(),
-    };
+  return {
+    id: viewId,
+    type: UIKitSurfaceType.MODAL,
+    title: {
+      type: 'plain_text',
+      text: ModalsEnum.CREATE_TASK_MODAL_NAME,
+    },
+    close: closeButton,
+    submit: submitButton,
+    blocks: block,
+  };
 }

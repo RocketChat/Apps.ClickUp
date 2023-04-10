@@ -1,11 +1,6 @@
-import {
-    IHttp,
-    IModify,
-    IPersistence,
-    IRead,
-} from "@rocket.chat/apps-engine/definition/accessors";
+import { IHttp, IModify, IPersistence, IRead } from "@rocket.chat/apps-engine/definition/accessors";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
-import { UIKitBlockInteractionContext} from '@rocket.chat/apps-engine/definition/uikit';
+import { UIKitBlockInteractionContext } from "@rocket.chat/apps-engine/definition/uikit";
 import { IUIKitBaseIncomingInteraction } from "@rocket.chat/apps-engine/definition/uikit/UIKitIncomingInteractionTypes";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { getAccessTokenForUser } from "../../storage/users";
@@ -47,15 +42,11 @@ export async function shareTask({
             textSender.setRoom(room);
         }
     await modify.getCreator().finish(textSender);
+    }else {
+    const textSender = await modify.getCreator().startMessage().setText(`❗️ Unable to share task! \n Error ${response.data.err}`);
+    if (room) {
+      textSender.setRoom(room);
     }
-    else {
-        const textSender = await modify
-        .getCreator()
-        .startMessage()
-        .setText(`❗️ Unable to share task! \n Error ${response.data.err}`);
-        if (room) {
-            textSender.setRoom(room);
-        }
     await modify.getCreator().finish(textSender);
-    }
+  }
 }
